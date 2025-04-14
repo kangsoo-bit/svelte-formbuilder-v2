@@ -1,141 +1,148 @@
 <!-- ControlProperties.svelte -->
 <script lang="ts">
-	import type { FormField } from '$lib/types/form';
-	import { fade } from 'svelte/transition';
+	import type { FormField } from '$lib/types';
 
-	let { control, onUpdate, onClose } = $props<{
+	let { control = $bindable(), onUpdate, onClose } = $props<{
 		control: FormField;
 		onUpdate: (control: FormField) => void;
 		onClose: () => void;
 	}>();
 
 	let editingControl = $state<FormField>({ ...control });
-	let newOption = $state('');
 
-	function handleLabelChange(event: Event) {
-		const target = event.target as HTMLInputElement;
-		editingControl = {
-			...editingControl,
-			label: target.value
-		};
-	}
-
-	function handleAddOption() {
-		if (!newOption.trim()) return;
-		
-		editingControl = {
-			...editingControl,
-			options: [...(editingControl.options || []), newOption.trim()]
-		};
-		newOption = '';
-	}
-
-	function handleRemoveOption(index: number) {
-		editingControl = {
-			...editingControl,
-			options: editingControl.options?.filter((_, i) => i !== index)
-		};
-	}
-
-	function handleSave() {
+	function handleUpdate() {
 		onUpdate(editingControl);
+	}
+
+	function addOption() {
+		if (!editingControl.options) {
+			editingControl.options = [];
+		}
+		editingControl.options = [
+			...editingControl.options,
+			{ value: `option${editingControl.options.length + 1}`, label: `옵션 ${editingControl.options.length + 1}` }
+		];
+	}
+
+	function removeOption(index: number) {
+		if (!editingControl.options) return;
+		editingControl.options = editingControl.options.filter((_, i) => i !== index);
+	}
+
+	function updateOption(index: number, field: 'value' | 'label', value: string) {
+		if (!editingControl.options) return;
+		editingControl.options = editingControl.options.map((option, i) =>
+			i === index ? { ...option, [field]: value } : option
+		);
 	}
 </script>
 
-<div class="properties-panel" transition:fade>
-	<div class="panel-header">
-		<h3>속성 편집</h3>
-		<button class="close-button" onclick={onClose}>×</button>
+<div class="properties-editor">
+	<div class="header flex justify-between items-center mb-6">
+		<h3 class="text-lg font-semibold">속성 편집</h3>
+		<button
+			class="text-gray-500 hover:text-gray-700"
+			onclick={onClose}
+		>
+			✕
+		</button>
 	</div>
 
-	<div class="panel-content">
-		<div class="form-group">
-			<label for="label">라벨</label>
-			<input
-				type="text"
-				id="label"
-				value={editingControl.label}
-				onchange={handleLabelChange}
-				placeholder="라벨을 입력하세요"
-			/>
-		</div>
+	<div class="form-group mb-4">
+		<label class="block text-sm font-medium text-gray-700 mb-1">
+			라벨
+		</label>
+		<input
+			type="text"
+			class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+			bind:value={editingControl.label}
+		/>
+	</div>
 
-		{#if ['select', 'radio', 'checkbox'].includes(editingControl.type)}
-			<div class="form-group">
-				<label>옵션</label>
-				<div class="options-list">
-					{#each editingControl.options || [] as option, i (i)}
-						<div class="option-item">
-							<span>{option}</span>
-							<button
-								class="remove-option"
-								onclick={() => handleRemoveOption(i)}
-								type="button"
-							>
-								×
-							</button>
-						</div>
-					{/each}
-				</div>
-
-				<div class="add-option">
-					<input
-						type="text"
-						bind:value={newOption}
-						placeholder="새 옵션 추가"
-						onkeydown={(e) => e.key === 'Enter' && handleAddOption()}
-					/>
-					<button onclick={handleAddOption} type="button">추가</button>
-				</div>
+	{#if editingControl.type === 'select' || editingControl.type === 'radio'}
+		<div class="form-group mb-4">
+			<label class="block text-sm font-medium text-gray-700 mb-1">
+				옵션
+			</label>
+			<div class="space-y-2">
+				{#each editingControl.options || [] as option, index}
+					<div class="flex gap-2">
+						<input
+							type="text"
+							class="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+							placeholder="값"
+							value={option.value}
+							oninput={(e) => updateOption(index, 'value', e.currentTarget.value)}
+						/>
+						<input
+							type="text"
+							class="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+							placeholder="라벨"
+							value={option.label}
+							oninput={(e) => updateOption(index, 'label', e.currentTarget.value)}
+						/>
+						<button
+							class="text-red-500 hover:text-red-700 px-2"
+							onclick={() => removeOption(index)}
+						>
+							✕
+						</button>
+					</div>
+				{/each}
+				<button
+					class="w-full p-2 border border-dashed rounded hover:bg-gray-50 text-gray-600"
+					onclick={addOption}
+				>
+					+ 옵션 추가
+				</button>
 			</div>
-		{/if}
-
-		<div class="button-group">
-			<button class="save-button" onclick={handleSave}>저장</button>
-			<button class="cancel-button" onclick={onClose}>취소</button>
 		</div>
+	{/if}
+
+	<div class="flex justify-end space-x-2 mt-6">
+		<button
+			class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+			onclick={onClose}
+		>
+			취소
+		</button>
+		<button
+			class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+			onclick={handleUpdate}
+		>
+			저장
+		</button>
 	</div>
 </div>
 
 <style>
-	.properties-panel {
+	.properties-editor {
 		position: fixed;
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
 		background: white;
-		border-radius: 8px;
+		padding: 1.5rem;
+		border-radius: 0.5rem;
 		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		width: 400px;
-		max-width: 90vw;
-		z-index: 1000;
+		width: 90%;
+		max-width: 500px;
+		max-height: 90vh;
+		overflow-y: auto;
 	}
 
-	.panel-header {
+	.header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 1rem;
-		border-bottom: 1px solid #eee;
+		margin-bottom: 1rem;
 	}
 
-	.panel-header h3 {
+	.header h3 {
 		margin: 0;
 		font-size: 1.2rem;
-		color: #333;
-	}
-
-	.close-button {
-		background: none;
-		border: none;
-		font-size: 1.5rem;
-		cursor: pointer;
-		padding: 0;
+		font-weight: 600;
 		color: #666;
-	}
-
-	.panel-content {
-		padding: 1rem;
 	}
 
 	.form-group {

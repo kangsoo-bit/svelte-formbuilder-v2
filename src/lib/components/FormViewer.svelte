@@ -1,52 +1,108 @@
 <!-- FormViewer.svelte -->
 <script lang="ts">
-    import Form from './Form.svelte';
-    import type { FormData, FormModel, FormErrors, FormViewerProps, GetFormFunction } from '$lib/types/form';
+    import type { Form, FormField } from '$lib/types';
 
-    let props = $props();
-    let { 
-        formName = '', 
-        templates = [] as string[], 
-        getFormFunc = undefined as GetFormFunction | undefined 
-    } = props;
-    
-    let data = $state({} as FormData);
-    let model = $state({} as FormModel);
-    let errors = $state({} as FormErrors);
+    let { form } = $props<{ form: Form }>();
+    let formData = $state<Record<string, any>>({});
+    let errors = $state<Record<string, string>>({});
 
-    async function loadForm() {
-        if (!formName || !getFormFunc) return;
-
-        try {
-            const formData = await getFormFunc(formName);
-            if (formData) {
-                model = formData.model || {};
-                data = formData.initialData || {};
-            }
-        } catch (error) {
-            console.error('Error loading form:', error);
-        }
+    function handleSubmit() {
+        // 폼 데이터 검증 및 제출 로직
+        console.log('Form data:', formData);
     }
 
-    $effect(() => {
-        loadForm();
-    });
+    function handleChange(field: string, value: any) {
+        formData = { ...formData, [field]: value };
+    }
 </script>
 
-<div class="form-viewer">
-    <div class="viewer-header">
-        <h2>폼 미리보기: {formName}</h2>
+<div class="form-viewer p-6 bg-white rounded-lg shadow">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold mb-2">{form.title}</h2>
+        {#if form.description}
+            <p class="text-gray-600">{form.description}</p>
+        {/if}
     </div>
 
-    <div class="viewer-content">
-        <Form
-            {formName}
-            {data}
-            {model}
-            {errors}
-            readOnly={true}
-        />
-    </div>
+    <form on:submit|preventDefault={handleSubmit} class="space-y-6">
+        {#each Object.entries(form.model) as [fieldId, field]}
+            {@const typedField = field as FormField}
+            <div class="form-field">
+                <label class="block text-sm font-medium text-gray-700 mb-1" for={fieldId}>
+                    {typedField.label}
+                </label>
+
+                {#if typedField.type === 'text' || typedField.type === 'number'}
+                    <input
+                        type={typedField.type}
+                        id={fieldId}
+                        class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={formData[fieldId] || ''}
+                        on:input={(e) => handleChange(fieldId, e.currentTarget.value)}
+                    />
+                {:else if typedField.type === 'textarea'}
+                    <textarea
+                        id={fieldId}
+                        class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={formData[fieldId] || ''}
+                        on:input={(e) => handleChange(fieldId, e.currentTarget.value)}
+                    ></textarea>
+                {:else if typedField.type === 'select'}
+                    <select
+                        id={fieldId}
+                        class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={formData[fieldId] || ''}
+                        on:change={(e) => handleChange(fieldId, e.currentTarget.value)}
+                    >
+                        <option value="">선택하세요</option>
+                        {#each typedField.options || [] as option}
+                            <option value={option.value}>{option.label}</option>
+                        {/each}
+                    </select>
+                {:else if typedField.type === 'checkbox'}
+                    <label class="inline-flex items-center">
+                        <input
+                            type="checkbox"
+                            id={fieldId}
+                            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked={formData[fieldId] || false}
+                            on:change={(e) => handleChange(fieldId, e.currentTarget.checked)}
+                        />
+                        <span class="ml-2">{typedField.label}</span>
+                    </label>
+                {:else if typedField.type === 'radio'}
+                    <div class="space-y-2">
+                        {#each typedField.options || [] as option}
+                            <label class="inline-flex items-center">
+                                <input
+                                    type="radio"
+                                    name={fieldId}
+                                    class="border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    value={option.value}
+                                    checked={formData[fieldId] === option.value}
+                                    on:change={(e) => handleChange(fieldId, e.currentTarget.value)}
+                                />
+                                <span class="ml-2">{option.label}</span>
+                            </label>
+                        {/each}
+                    </div>
+                {/if}
+
+                {#if errors[fieldId]}
+                    <p class="mt-1 text-sm text-red-600">{errors[fieldId]}</p>
+                {/if}
+            </div>
+        {/each}
+
+        <div class="flex justify-end">
+            <button
+                type="submit"
+                class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+                제출
+            </button>
+        </div>
+    </form>
 </div>
 
 <style>
