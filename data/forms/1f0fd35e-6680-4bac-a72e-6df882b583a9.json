@@ -6,12 +6,26 @@
     "text_1744618178913": {
       "id": "text_1744618178913",
       "type": "text",
-      "label": "새 text"
+      "label": "새 text",
+      "position": {
+        "zIndex": 4,
+        "x": 67,
+        "y": 353
+      }
     },
     "checkbox_1744618180268": {
       "id": "checkbox_1744618180268",
       "type": "checkbox",
-      "label": "성별체크"
+      "label": "성별체크",
+      "position": {
+        "zIndex": 5,
+        "x": 291,
+        "y": 361
+      },
+      "style": {
+        "width": "279px",
+        "height": "91px"
+      }
     },
     "radio_1744618181722": {
       "id": "radio_1744618181722",
@@ -26,7 +40,16 @@
           "value": "여",
           "label": "F"
         }
-      ]
+      ],
+      "position": {
+        "x": 59,
+        "y": 691,
+        "zIndex": 1
+      },
+      "style": {
+        "width": "502px",
+        "height": "123px"
+      }
     },
     "select_1744618183196": {
       "id": "select_1744618183196",
@@ -41,11 +64,29 @@
           "value": "여",
           "label": "F"
         }
-      ]
+      ],
+      "position": {
+        "zIndex": 3,
+        "x": 61,
+        "y": 578
+      },
+      "style": {
+        "width": "306px",
+        "height": "101px"
+      }
     },
     "text_1744619189741": {
       "type": "text",
-      "label": "새 text"
+      "label": "새 text",
+      "position": {
+        "zIndex": 6,
+        "x": 65,
+        "y": 461
+      },
+      "style": {
+        "width": "509px",
+        "height": "98px"
+      }
     },
     "select_1744619363652": {
       "type": "select",
@@ -59,7 +100,12 @@
           "value": "선택2",
           "label": "2"
         }
-      ]
+      ],
+      "position": {
+        "zIndex": 5,
+        "x": 383,
+        "y": 585
+      }
     }
   },
   "createdAt": "2025-04-14T08:09:56.360Z",

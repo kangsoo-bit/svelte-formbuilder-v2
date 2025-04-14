@@ -3,7 +3,35 @@
 	import type { FormField } from '$lib/types';
 
 	let { control, onUpdate, onclose } = $props();
-	let editingControl = $state({ ...control });
+	
+	let editingControl = $state<FormField>({
+		...control,
+		position: {
+			x: Number(control.position?.x || 0),
+			y: Number(control.position?.y || 0),
+			zIndex: Number(control.position?.zIndex || 1)
+		},
+		style: {
+			...control.style
+		},
+		options: control.options ? [...control.options] : undefined
+	});
+
+	// control prop이 변경될 때마다 editingControl 업데이트
+	$effect(() => {
+		editingControl = {
+			...control,
+			position: {
+				x: Number(control.position?.x || 0),
+				y: Number(control.position?.y || 0),
+				zIndex: Number(control.position?.zIndex || 1)
+			},
+			style: {
+				...control.style
+			},
+			options: control.options ? [...control.options] : undefined
+		};
+	});
 
 	function updateControl() {
 		onUpdate(editingControl);
@@ -65,11 +93,8 @@
 			라벨
 			<input 
 				type="text" 
-				value={editingControl.label} 
-				oninput={(e) => {
-					editingControl.label = e.currentTarget.value;
-					updateControl();
-				}}
+				bind:value={editingControl.label}
+				oninput={updateControl}
 			/>
 		</label>
 	</div>
@@ -181,9 +206,7 @@
 	h3 {
 		font-size: 1.125rem;
 		font-weight: 600;
-		margin-bottom: 1rem;
-		padding-bottom: 0.5rem;
-		border-bottom: 1px solid #e5e7eb;
+		margin: 0;
 	}
 
 	h4 {
@@ -199,21 +222,20 @@
 	label {
 		display: block;
 		margin-bottom: 0.5rem;
-		color: #374151;
 	}
 
 	input {
 		width: 100%;
 		padding: 0.5rem;
 		border: 1px solid #d1d5db;
-		border-radius: 0.25rem;
+		border-radius: 0.375rem;
 		margin-top: 0.25rem;
 	}
 
 	input:focus {
 		outline: none;
 		border-color: #2563eb;
-		box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
+		box-shadow: 0 0 0 2px rgba(37,99,235,0.2);
 	}
 
 	.option-row {
@@ -224,30 +246,29 @@
 	}
 
 	.add-option {
-		width: 100%;
-		padding: 0.5rem;
-		background: #f3f4f6;
-		border: 1px dashed #9ca3af;
-		border-radius: 0.25rem;
-		color: #4b5563;
-		margin-bottom: 1rem;
+		background: #2563eb;
+		color: white;
+		border: none;
+		padding: 0.5rem 1rem;
+		border-radius: 0.375rem;
 		cursor: pointer;
+		margin-bottom: 1rem;
 	}
 
 	.add-option:hover {
-		background: #e5e7eb;
+		background: #1d4ed8;
 	}
 
 	.remove-option {
-		padding: 0 0.5rem;
-		background: #fee2e2;
+		background: none;
 		border: none;
-		border-radius: 0.25rem;
-		color: #dc2626;
+		color: #ef4444;
 		cursor: pointer;
+		font-size: 1.25rem;
+		padding: 0 0.5rem;
 	}
 
 	.remove-option:hover {
-		background: #fecaca;
+		color: #dc2626;
 	}
 </style> 

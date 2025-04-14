@@ -14,6 +14,10 @@
 	let dropTarget = $state<string | null>(null);
 	let isDraggingPosition = $state(false);
 	let dragOffset = $state({ x: 0, y: 0 });
+	let isResizing = $state(false);
+	let resizeDirection = $state<string | null>(null);
+	let initialSize = $state({ width: 0, height: 0 });
+	let initialPosition = $state({ x: 0, y: 0 });
 
 	// 컨트롤 순서 초기화
 	$effect(() => {
@@ -69,18 +73,16 @@
 			const y = e.clientY - rect.top - dragOffset.y;
 
 			// 위치 업데이트
-			const updatedControl = {
-				...form.model[editingControlId],
-				position: {
-					...form.model[editingControlId].position,
-					x,
-					y
-				}
-			};
-
 			form.model = {
 				...form.model,
-				[editingControlId]: updatedControl
+				[editingControlId]: {
+					...form.model[editingControlId],
+					position: {
+						...form.model[editingControlId].position,
+						x,
+						y
+					}
+				}
 			};
 		}
 	}
@@ -191,31 +193,55 @@
 		editingControlId = controlId;
 		isDraggingPosition = true;
 
-		const control = form.model[controlId];
 		const rect = (e.target as HTMLElement).getBoundingClientRect();
-		
 		dragOffset = {
 			x: e.clientX - rect.left,
 			y: e.clientY - rect.top
 		};
 
 		// zIndex 업데이트
-		const updatedControl = {
-			...control,
-			position: {
-				...control.position,
-				zIndex: maxZIndex++
+		form.model = {
+			...form.model,
+			[controlId]: {
+				...form.model[controlId],
+				position: {
+					...form.model[controlId].position,
+					zIndex: maxZIndex++
+				}
 			}
 		};
 
+		// 전역 마우스 이벤트 리스너 추가
+		document.addEventListener('mousemove', handleMouseMove);
+		document.addEventListener('mouseup', handleMouseUp);
+	}
+
+	function handleMouseMove(e: MouseEvent) {
+		if (!isDraggingPosition || !editingControlId || !form?.model[editingControlId]) return;
+
+		const rect = formPreviewElement.getBoundingClientRect();
+		const x = e.clientX - rect.left - dragOffset.x;
+		const y = e.clientY - rect.top - dragOffset.y;
+
 		form.model = {
 			...form.model,
-			[controlId]: updatedControl
+			[editingControlId]: {
+				...form.model[editingControlId],
+				position: {
+					...form.model[editingControlId].position,
+					x,
+					y
+				}
+			}
 		};
 	}
 
 	function handleMouseUp() {
-		isDraggingPosition = false;
+		if (isDraggingPosition) {
+			isDraggingPosition = false;
+			document.removeEventListener('mousemove', handleMouseMove);
+			document.removeEventListener('mouseup', handleMouseUp);
+		}
 	}
 
 	function deleteControl(controlId: string) {
@@ -233,84 +259,214 @@
 
 	function handleControlUpdate(controlId: string, updatedControl: FormField) {
 		if (!controlId || !form) return;
+		
+		// 모델 업데이트
 		form.model = {
 			...form.model,
 			[controlId]: updatedControl
 		};
-		editingControlId = null;
+		
+		// 속성창은 닫지 않고 계속 열어둡니다.
+		// editingControlId = null;
 	}
 
 	function handleCloseProperties() {
 		editingControlId = null;
 	}
+
+	function startResize(e: MouseEvent, controlId: string, direction: string) {
+		if (!form?.model[controlId]) return;
+		e.preventDefault();
+		e.stopPropagation();
+		
+		editingControlId = controlId;
+		isResizing = true;
+		resizeDirection = direction;
+
+		const control = form.model[controlId];
+		const element = e.target as HTMLElement;
+		const controlElement = element.closest('.control-wrapper') as HTMLElement;
+		
+		initialSize = {
+			width: controlElement.offsetWidth,
+			height: controlElement.offsetHeight
+		};
+		
+		initialPosition = {
+			x: control.position?.x || 0,
+			y: control.position?.y || 0
+		};
+
+		document.addEventListener('mousemove', handleResizeMove);
+		document.addEventListener('mouseup', handleResizeEnd);
+	}
+
+	function handleResizeMove(e: MouseEvent) {
+		if (!isResizing || !editingControlId || !form?.model[editingControlId]) return;
+
+		const rect = formPreviewElement.getBoundingClientRect();
+		const control = form.model[editingControlId];
+		let newWidth = initialSize.width;
+		let newHeight = initialSize.height;
+		let newX = initialPosition.x;
+		let newY = initialPosition.y;
+
+		if (resizeDirection?.includes('e')) {
+			newWidth = Math.max(100, e.clientX - rect.left - initialPosition.x);
+		}
+		if (resizeDirection?.includes('s')) {
+			newHeight = Math.max(40, e.clientY - rect.top - initialPosition.y);
+		}
+		if (resizeDirection?.includes('w')) {
+			const deltaX = e.clientX - rect.left - initialPosition.x;
+			newWidth = Math.max(100, initialSize.width - deltaX);
+			newX = initialPosition.x + deltaX;
+		}
+		if (resizeDirection?.includes('n')) {
+			const deltaY = e.clientY - rect.top - initialPosition.y;
+			newHeight = Math.max(40, initialSize.height - deltaY);
+			newY = initialPosition.y + deltaY;
+		}
+
+		form.model = {
+			...form.model,
+			[editingControlId]: {
+				...control,
+				position: {
+					...control.position,
+					x: newX,
+					y: newY
+				},
+				style: {
+					...control.style,
+					width: `${newWidth}px`,
+					height: `${newHeight}px`
+				}
+			}
+		};
+	}
+
+	function handleResizeEnd() {
+		isResizing = false;
+		resizeDirection = null;
+		document.removeEventListener('mousemove', handleResizeMove);
+		document.removeEventListener('mouseup', handleResizeEnd);
+	}
 </script>
 
 <div class="form-builder">
-	<div class="form-preview">
+	<div class="form-preview" 
+		ondragover={handleDragOver}
+		ondragleave={handleDragLeave}
+		ondrop={handleDrop}
+		onclick={() => {
+			if (editingControlId) {
+				editingControlId = null;
+			}
+		}}
+	>
 		<div class="form-preview-inner" bind:this={formPreviewElement}>
 			{#each Object.entries(form.model) as [controlId, control]}
 				{@const typedControl = control as FormField}
 				<div 
 					class="control-wrapper"
-					style="position: absolute; left: {typedControl.position?.x || 0}px; top: {typedControl.position?.y || 0}px; z-index: {typedControl.position?.zIndex || 1}; width: {typedControl.style?.width || 'auto'}; height: {typedControl.style?.height || 'auto'};"
+					style="
+						position: absolute; 
+						left: {typedControl.position?.x || 0}px; 
+						top: {typedControl.position?.y || 0}px; 
+						z-index: {typedControl.position?.zIndex || 1};
+						width: {typedControl.style?.width || 'auto'};
+						height: {typedControl.style?.height || 'auto'};
+					"
 					draggable="true"
 					onmousedown={(e) => startPositionDrag(e, controlId)}
 					ondragstart={(e) => handleDragStart(e, typedControl.type)}
 					ondragend={handleControlDragEnd}
+					onclick={(e) => {
+						e.stopPropagation();
+						handleEditControl(controlId);
+					}}
+					class:selected={editingControlId === controlId}
 				>
-					<div class="control-content p-4 bg-white border rounded shadow-sm">
-						<div class="control-header flex justify-between items-center mb-2">
-							<span class="font-medium">{typedControl.label}</span>
-							<div class="control-actions space-x-2">
-								<button
-									class="text-blue-500 hover:text-blue-700"
-									onclick={() => handleEditControl(controlId)}
-								>
-									편집
-								</button>
-								<button
-									class="text-red-500 hover:text-red-700"
-									onclick={() => deleteControl(controlId)}
-								>
-									삭제
-								</button>
-							</div>
+					<div class="resize-handle n" onmousedown={(e) => startResize(e, controlId, 'n')} />
+					<div class="resize-handle e" onmousedown={(e) => startResize(e, controlId, 'e')} />
+					<div class="resize-handle s" onmousedown={(e) => startResize(e, controlId, 's')} />
+					<div class="resize-handle w" onmousedown={(e) => startResize(e, controlId, 'w')} />
+					<div class="resize-handle ne" onmousedown={(e) => startResize(e, controlId, 'ne')} />
+					<div class="resize-handle se" onmousedown={(e) => startResize(e, controlId, 'se')} />
+					<div class="resize-handle sw" onmousedown={(e) => startResize(e, controlId, 'sw')} />
+					<div class="resize-handle nw" onmousedown={(e) => startResize(e, controlId, 'nw')} />
+					<div class="control-content">
+						<div class="control-header">
+							<label class="control-label">{typedControl.label}</label>
+							<button
+								class="delete-button"
+								onclick={(e) => {
+									e.stopPropagation();
+									deleteControl(controlId);
+								}}
+							>
+								×
+							</button>
 						</div>
 
-						{#if typedControl.type === 'text' || typedControl.type === 'number'}
-							<input
-								type={typedControl.type}
-								class="w-full p-2 border rounded"
-								placeholder={typedControl.label}
-								disabled
-							/>
-						{:else if typedControl.type === 'textarea'}
-							<textarea
-								class="w-full p-2 border rounded"
-								placeholder={typedControl.label}
-								disabled
-							></textarea>
-						{:else if typedControl.type === 'select'}
-							<select class="w-full p-2 border rounded" disabled>
-								{#each typedControl.options || [] as option}
-									<option value={option.value}>{option.label}</option>
-								{/each}
-							</select>
-						{:else if typedControl.type === 'checkbox'}
-							<label class="flex items-center">
-								<input type="checkbox" disabled />
-								<span class="ml-2">{typedControl.label}</span>
-							</label>
-						{:else if typedControl.type === 'radio'}
-							<div class="space-y-2">
-								{#each typedControl.options || [] as option}
-									<label class="flex items-center">
-										<input type="radio" name={controlId} disabled />
-										<span class="ml-2">{option.label}</span>
-									</label>
-								{/each}
-							</div>
-						{/if}
+						<div class="control-field">
+							{#if typedControl.type === 'text'}
+								<input
+									type="text"
+									class="form-input"
+									placeholder={typedControl.label}
+									style={typedControl.style ? Object.entries(typedControl.style).map(([k, v]) => `${k}: ${v}`).join(';') : ''}
+									disabled
+								/>
+							{:else if typedControl.type === 'number'}
+								<input
+									type="number"
+									class="form-input"
+									placeholder={typedControl.label}
+									style={typedControl.style ? Object.entries(typedControl.style).map(([k, v]) => `${k}: ${v}`).join(';') : ''}
+									disabled
+								/>
+							{:else if typedControl.type === 'textarea'}
+								<textarea
+									class="form-textarea"
+									placeholder={typedControl.label}
+									style={typedControl.style ? Object.entries(typedControl.style).map(([k, v]) => `${k}: ${v}`).join(';') : ''}
+									disabled
+								></textarea>
+							{:else if typedControl.type === 'select'}
+								<select 
+									class="form-select"
+									style={typedControl.style ? Object.entries(typedControl.style).map(([k, v]) => `${k}: ${v}`).join(';') : ''}
+									disabled
+								>
+									<option value="">선택하세요</option>
+									{#each typedControl.options || [] as option}
+										<option value={option.value}>{option.label}</option>
+									{/each}
+								</select>
+							{:else if typedControl.type === 'checkbox'}
+								<label 
+									class="form-checkbox"
+									style={typedControl.style ? Object.entries(typedControl.style).map(([k, v]) => `${k}: ${v}`).join(';') : ''}
+								>
+									<input type="checkbox" disabled />
+									<span class="checkbox-label">{typedControl.label}</span>
+								</label>
+							{:else if typedControl.type === 'radio'}
+								<div 
+									class="form-radio-group"
+									style={typedControl.style ? Object.entries(typedControl.style).map(([k, v]) => `${k}: ${v}`).join(';') : ''}
+								>
+									{#each typedControl.options || [] as option}
+										<label class="form-radio">
+											<input type="radio" name={controlId} disabled />
+											<span class="radio-label">{option.label}</span>
+										</label>
+									{/each}
+								</div>
+							{/if}
+						</div>
 					</div>
 				</div>
 			{/each}
@@ -320,7 +476,7 @@
 	<div class="properties-panel">
 		{#if editingControlId && form?.model[editingControlId]}
 			<ControlProperties
-				control={form.model[editingControlId] as FormField}
+				control={form.model[editingControlId]}
 				onUpdate={(updatedControl: FormField) => {
 					if (editingControlId) handleControlUpdate(editingControlId, updatedControl);
 				}}
@@ -336,15 +492,17 @@
 		gap: 1rem;
 		height: 100vh;
 		padding: 1rem;
+		background: #f9fafb;
 	}
 
 	.form-preview {
 		flex: 1;
 		position: relative;
-		border: 1px solid #ccc;
+		border: 1px solid #e5e7eb;
 		border-radius: 0.5rem;
 		overflow: hidden;
-		background: #f5f5f5;
+		background: white;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 	}
 
 	.form-preview-inner {
@@ -352,27 +510,208 @@
 		width: 100%;
 		height: 100%;
 		min-height: 500px;
+		padding: 1rem;
 	}
 
 	.properties-panel {
 		width: 300px;
-		border-left: 1px solid #ccc;
+		border-left: 1px solid #e5e7eb;
 		padding-left: 1rem;
 		overflow-y: auto;
 	}
 
 	.control-wrapper {
 		cursor: move;
-		background: white;
-		border: 1px solid transparent;
-		border-radius: 0.25rem;
-		padding: 0.5rem;
-		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-		transition: border-color 0.2s, box-shadow 0.2s;
+		user-select: none;
+		min-width: 200px;
+		max-width: 100%;
+		position: relative;
 	}
 
-	.control-wrapper:hover {
-		border-color: #2563eb;
-		box-shadow: 0 4px 6px rgba(37,99,235,0.1);
+	.resize-handle {
+		position: absolute;
+		background: transparent;
+		z-index: 1;
+	}
+
+	.resize-handle.n {
+		top: -3px;
+		left: 0;
+		right: 0;
+		height: 6px;
+		cursor: n-resize;
+	}
+
+	.resize-handle.e {
+		top: 0;
+		right: -3px;
+		bottom: 0;
+		width: 6px;
+		cursor: e-resize;
+	}
+
+	.resize-handle.s {
+		bottom: -3px;
+		left: 0;
+		right: 0;
+		height: 6px;
+		cursor: s-resize;
+	}
+
+	.resize-handle.w {
+		top: 0;
+		left: -3px;
+		bottom: 0;
+		width: 6px;
+		cursor: w-resize;
+	}
+
+	.resize-handle.ne {
+		top: -3px;
+		right: -3px;
+		width: 6px;
+		height: 6px;
+		cursor: ne-resize;
+	}
+
+	.resize-handle.se {
+		bottom: -3px;
+		right: -3px;
+		width: 6px;
+		height: 6px;
+		cursor: se-resize;
+	}
+
+	.resize-handle.sw {
+		bottom: -3px;
+		left: -3px;
+		width: 6px;
+		height: 6px;
+		cursor: sw-resize;
+	}
+
+	.resize-handle.nw {
+		top: -3px;
+		left: -3px;
+		width: 6px;
+		height: 6px;
+		cursor: nw-resize;
+	}
+
+	.control-wrapper:hover .resize-handle {
+		background: #2563eb;
+	}
+
+	.control-wrapper.selected .resize-handle {
+		background: #2563eb;
+	}
+
+	.control-wrapper.selected {
+		outline: 2px solid #2563eb;
+		outline-offset: 2px;
+		border-radius: 0.375rem;
+	}
+
+	.control-content {
+		height: 100%;
+		background: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		overflow: hidden;
+	}
+
+	.control-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.5rem;
+		background: #f8fafc;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.control-label {
+		font-weight: 500;
+		color: #1f2937;
+	}
+
+	.delete-button {
+		background: none;
+		border: none;
+		color: #ef4444;
+		cursor: pointer;
+		font-size: 1.25rem;
+		padding: 0 0.25rem;
+		line-height: 1;
+	}
+
+	.delete-button:hover {
+		color: #dc2626;
+	}
+
+	.control-field {
+		height: calc(100% - 40px); /* 헤더 높이를 제외한 나머지 */
+		padding: 0.5rem;
+	}
+
+	.form-input,
+	.form-select,
+	.form-textarea {
+		width: 100%;
+		height: 100%;
+		padding: 0.5rem;
+		border: 1px solid #d1d5db;
+		border-radius: 0.375rem;
+		background: #f9fafb;
+		color: #4b5563;
+		box-sizing: border-box;
+	}
+
+	.form-textarea {
+		min-height: 100px;
+		resize: none;
+	}
+
+	.form-checkbox,
+	.form-radio {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.25rem 0;
+	}
+
+	.form-radio-group {
+		height: 100%;
+		overflow-y: auto;
+	}
+
+	.checkbox-label,
+	.radio-label {
+		color: #4b5563;
+	}
+
+	input[type="checkbox"],
+	input[type="radio"] {
+		width: 1rem;
+		height: 1rem;
+		border: 1px solid #d1d5db;
+		border-radius: 0.25rem;
+	}
+
+	input[type="radio"] {
+		border-radius: 50%;
+	}
+
+	.form-select {
+		appearance: none;
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+		background-position: right 0.5rem center;
+		background-repeat: no-repeat;
+		background-size: 1.5em 1.5em;
+		padding-right: 2.5rem;
+	}
+
+	:global(*[disabled]) {
+		opacity: 0.7;
+		cursor: not-allowed;
 	}
 </style>
