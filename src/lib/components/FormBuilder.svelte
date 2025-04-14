@@ -18,6 +18,10 @@
 	let resizeDirection = $state<string | null>(null);
 	let initialSize = $state({ width: 0, height: 0 });
 	let initialPosition = $state({ x: 0, y: 0 });
+	let isSelecting = $state(false);
+	let selectionStart = $state({ x: 0, y: 0 });
+	let selectionEnd = $state({ x: 0, y: 0 });
+	let selectedControlIds = $state<string[]>([]);
 
 	// 컨트롤 순서 초기화
 	$effect(() => {
@@ -186,62 +190,156 @@
 		isDraggingPosition = false;
 	}
 
-	function startPositionDrag(e: MouseEvent, controlId: string) {
-		if (!form?.model[controlId]) return;
-		e.preventDefault();
+	function startSelection(e: MouseEvent) {
+		if (e.target !== formPreviewElement) return;
 		
-		editingControlId = controlId;
-		isDraggingPosition = true;
+		const rect = formPreviewElement.getBoundingClientRect();
+		const x = e.clientX - rect.left;
+		const y = e.clientY - rect.top;
+		
+		isSelecting = true;
+		selectionStart = { x, y };
+		selectionEnd = { x, y };
+		
+		document.addEventListener('mousemove', handleSelectionMove);
+		document.addEventListener('mouseup', handleSelectionEnd);
+	}
 
-		const rect = (e.target as HTMLElement).getBoundingClientRect();
+	function handleSelectionMove(e: MouseEvent) {
+		if (!isSelecting) return;
+		
+		const rect = formPreviewElement.getBoundingClientRect();
+		selectionEnd = {
+			x: e.clientX - rect.left,
+			y: e.clientY - rect.top
+		};
+		
+		// 선택 영역과 겹치는 컨트롤들을 찾아서 선택
+		const selectionRect = {
+			left: Math.min(selectionStart.x, selectionEnd.x),
+			top: Math.min(selectionStart.y, selectionEnd.y),
+			right: Math.max(selectionStart.x, selectionEnd.x),
+			bottom: Math.max(selectionStart.y, selectionEnd.y)
+		};
+
+		selectedControlIds = Object.entries(form?.model || {}).filter(([_, control]) => {
+			const typedControl = control as FormField;
+			const controlLeft = typedControl.position?.x || 0;
+			const controlTop = typedControl.position?.y || 0;
+			const controlRight = controlLeft + (parseInt(typedControl.style?.width as string) || 200);
+			const controlBottom = controlTop + (parseInt(typedControl.style?.height as string) || 40);
+
+			return controlLeft < selectionRect.right &&
+				controlRight > selectionRect.left &&
+				controlTop < selectionRect.bottom &&
+				controlBottom > selectionRect.top;
+		}).map(([id]) => id);
+	}
+
+	function handleSelectionEnd() {
+		isSelecting = false;
+		document.removeEventListener('mousemove', handleSelectionMove);
+		document.removeEventListener('mouseup', handleSelectionEnd);
+	}
+
+	function startPositionDrag(e: MouseEvent, controlId: string) {
+		if (!form?.model) return;
+		e.preventDefault();
+		e.stopPropagation();
+
+		// Ctrl/Cmd 키를 누르지 않은 상태에서 선택되지 않은 컨트롤을 클릭하면 단일 선택
+		if (!e.ctrlKey && !e.metaKey && !selectedControlIds.includes(controlId)) {
+			selectedControlIds = [controlId];
+		}
+		// Ctrl/Cmd 키를 누른 상태에서 클릭하면 토글
+		else if ((e.ctrlKey || e.metaKey) && !selectedControlIds.includes(controlId)) {
+			selectedControlIds = [...selectedControlIds, controlId];
+		}
+
+		isDraggingPosition = true;
+		const rect = formPreviewElement.getBoundingClientRect();
+		const control = form.model[controlId];
+		
+		// 드래그 시작 위치 저장
 		dragOffset = {
 			x: e.clientX - rect.left,
 			y: e.clientY - rect.top
 		};
 
-		// zIndex 업데이트
-		form.model = {
-			...form.model,
-			[controlId]: {
-				...form.model[controlId],
-				position: {
-					...form.model[controlId].position,
-					zIndex: maxZIndex++
-				}
-			}
-		};
+		// 선택된 각 컨트롤의 초기 위치를 저장
+		selectedControlIds.forEach(id => {
+			const control = form.model[id];
+			control.initialDragPosition = {
+				x: control.position?.x || 0,
+				y: control.position?.y || 0
+			};
+		});
 
-		// 전역 마우스 이벤트 리스너 추가
-		document.addEventListener('mousemove', handleMouseMove);
-		document.addEventListener('mouseup', handleMouseUp);
+		document.addEventListener('mousemove', handlePositionDragMove);
+		document.addEventListener('mouseup', handlePositionDragEnd);
 	}
 
-	function handleMouseMove(e: MouseEvent) {
-		if (!isDraggingPosition || !editingControlId || !form?.model[editingControlId]) return;
+	function handlePositionDragMove(e: MouseEvent) {
+		if (!isDraggingPosition || !form?.model) return;
 
 		const rect = formPreviewElement.getBoundingClientRect();
-		const x = e.clientX - rect.left - dragOffset.x;
-		const y = e.clientY - rect.top - dragOffset.y;
+		const currentX = e.clientX - rect.left;
+		const currentY = e.clientY - rect.top;
+		
+		// 마우스 이동 거리 계산
+		const deltaX = currentX - dragOffset.x;
+		const deltaY = currentY - dragOffset.y;
 
+		// 선택된 모든 컨트롤의 위치를 업데이트
 		form.model = {
 			...form.model,
-			[editingControlId]: {
-				...form.model[editingControlId],
-				position: {
-					...form.model[editingControlId].position,
-					x,
-					y
-				}
-			}
+			...Object.fromEntries(
+				selectedControlIds.map(id => {
+					const control = form.model[id];
+					const initialPos = control.initialDragPosition || { x: control.position?.x || 0, y: control.position?.y || 0 };
+					
+					return [id, {
+						...control,
+						position: {
+							...control.position,
+							x: initialPos.x + deltaX,
+							y: initialPos.y + deltaY
+						}
+					}];
+				})
+			)
 		};
 	}
 
-	function handleMouseUp() {
-		if (isDraggingPosition) {
-			isDraggingPosition = false;
-			document.removeEventListener('mousemove', handleMouseMove);
-			document.removeEventListener('mouseup', handleMouseUp);
+	function handlePositionDragEnd() {
+		if (!form?.model) return;
+		
+		// 초기 드래그 위치 정보 제거
+		selectedControlIds.forEach(id => {
+			if (form.model[id]) {
+				delete form.model[id].initialDragPosition;
+			}
+		});
+
+		isDraggingPosition = false;
+		document.removeEventListener('mousemove', handlePositionDragMove);
+		document.removeEventListener('mouseup', handlePositionDragEnd);
+	}
+
+	function handleControlClick(e: MouseEvent, controlId: string) {
+		e.stopPropagation();
+		
+		if (e.ctrlKey || e.metaKey) {
+			// Ctrl/Cmd + 클릭: 선택 토글
+			selectedControlIds = selectedControlIds.includes(controlId)
+				? selectedControlIds.filter(id => id !== controlId)
+				: [...selectedControlIds, controlId];
+		} else {
+			// 일반 클릭: 단일 선택
+			selectedControlIds = [controlId];
 		}
+		
+		handleEditControl(controlId);
 	}
 
 	function deleteControl(controlId: string) {
@@ -364,12 +462,25 @@
 				editingControlId = null;
 			}
 		}}
+		onmousedown={startSelection}
 	>
+		{#if isSelecting}
+			<div
+				class="selection-box"
+				style="
+					left: {Math.min(selectionStart.x, selectionEnd.x)}px;
+					top: {Math.min(selectionStart.y, selectionEnd.y)}px;
+					width: {Math.abs(selectionEnd.x - selectionStart.x)}px;
+					height: {Math.abs(selectionEnd.y - selectionStart.y)}px;
+				"
+			/>
+		{/if}
 		<div class="form-preview-inner" bind:this={formPreviewElement}>
 			{#each Object.entries(form.model) as [controlId, control]}
 				{@const typedControl = control as FormField}
 				<div 
 					class="control-wrapper"
+					class:selected={selectedControlIds.includes(controlId)}
 					style="
 						position: absolute; 
 						left: {typedControl.position?.x || 0}px; 
@@ -382,11 +493,7 @@
 					onmousedown={(e) => startPositionDrag(e, controlId)}
 					ondragstart={(e) => handleDragStart(e, typedControl.type)}
 					ondragend={handleControlDragEnd}
-					onclick={(e) => {
-						e.stopPropagation();
-						handleEditControl(controlId);
-					}}
-					class:selected={editingControlId === controlId}
+					onclick={(e) => handleControlClick(e, controlId)}
 				>
 					<div class="resize-handle n" onmousedown={(e) => startResize(e, controlId, 'n')} />
 					<div class="resize-handle e" onmousedown={(e) => startResize(e, controlId, 'e')} />
@@ -713,5 +820,13 @@
 	:global(*[disabled]) {
 		opacity: 0.7;
 		cursor: not-allowed;
+	}
+
+	.selection-box {
+		position: absolute;
+		border: 2px solid #2563eb;
+		background: rgba(37, 99, 235, 0.1);
+		pointer-events: none;
+		z-index: 9999;
 	}
 </style>
