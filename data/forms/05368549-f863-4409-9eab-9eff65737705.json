@@ -1,0 +1,24 @@
+{
+  "id": "05368549-f863-4409-9eab-9eff65737705",
+  "title": "통2",
+  "description": "통2",
+  "model": {
+    "text_1744618387002": {
+      "id": "text_1744618387002",
+      "type": "text",
+      "label": "새 text"
+    },
+    "text_1744618388350": {
+      "id": "text_1744618388350",
+      "type": "text",
+      "label": "새 text"
+    },
+    "text_1744618390013": {
+      "id": "text_1744618390013",
+      "type": "text",
+      "label": "새 text"
+    }
+  },
+  "createdAt": "2025-04-14T08:13:12.107Z",
+  "updatedAt": "2025-04-14T08:13:12.107Z"
+}

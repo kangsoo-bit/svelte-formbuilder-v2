@@ -1,12 +1,14 @@
 <!-- FormBuilder.svelte -->
 <script lang="ts">
-	import type { FormData, FormModel, FormErrors, FormBuilderProps, FormField } from '$lib/types/form';
+	import type { FormData, FormModel, FormErrors, FormBuilderProps, FormField, Form } from '$lib/types/form';
 	import ControlProperties from './ControlProperties.svelte';
 
 	let props = $props();
 	let formName = props.formName ?? '';
 	let templates = props.templates ?? [];
 
+	let title = $state('');
+	let description = $state('');
 	let actions = $state<Array<{ type: string; handler: () => void }>>([]);
 	let data = $state<FormData>({});
 	let model = $state<FormModel>({});
@@ -17,6 +19,53 @@
 	let draggedControl = $state<string | null>(null);
 	let dropTarget = $state<string | null>(null);
 	let editingControlId = $state<string | null>(null);
+
+	async function saveForm() {
+		const form: Form = {
+			id: crypto.randomUUID(),
+			title,
+			description,
+			model,
+			createdAt: new Date(),
+			updatedAt: new Date()
+		};
+
+		try {
+			const response = await fetch('/api/forms', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify(form)
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to save form');
+			}
+
+			alert('폼이 저장되었습니다.');
+		} catch (error) {
+			console.error('Error saving form:', error);
+			alert('폼 저장에 실패했습니다.');
+		}
+	}
+
+	async function loadForm(formId: string) {
+		try {
+			const response = await fetch(`/api/forms/${formId}`);
+			if (!response.ok) {
+				throw new Error('Failed to load form');
+			}
+
+			const form: Form = await response.json();
+			title = form.title;
+			description = form.description ?? '';
+			model = form.model;
+		} catch (error) {
+			console.error('Error loading form:', error);
+			alert('폼 불러오기에 실패했습니다.');
+		}
+	}
 
 	function getForm(formName: string): Promise<{ model: FormModel; initialData: FormData }> {
 		// 폼 소스를 가져오는 함수
@@ -127,6 +176,9 @@
 
 <div class="form-builder">
 	<div class="toolbar">
+		<input type="text" bind:value={title} placeholder="폼 제목" />
+		<textarea bind:value={description} placeholder="폼 설명"></textarea>
+		<button onclick={saveForm}>저장</button>
 		<button onclick={() => readOnly = !readOnly}>
 			{readOnly ? '편집 모드' : '읽기 전용 모드'}
 		</button>
@@ -232,6 +284,23 @@
 		padding: 0.5rem;
 		background-color: #f5f5f5;
 		border-radius: 4px;
+		align-items: center;
+	}
+
+	.toolbar input[type="text"] {
+		padding: 0.5rem;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		width: 200px;
+	}
+
+	.toolbar textarea {
+		padding: 0.5rem;
+		border: 1px solid #ddd;
+		border-radius: 4px;
+		width: 300px;
+		height: 60px;
+		resize: vertical;
 	}
 
 	.form-container {
@@ -239,8 +308,16 @@
 		gap: 1rem;
 	}
 
+	.form-container.readonly {
+		display: block;
+	}
+
 	.form-container.readonly .form-editor {
 		display: none;
+	}
+
+	.form-container.readonly .form-preview {
+		width: 100%;
 	}
 
 	.form-preview {

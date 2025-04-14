@@ -23,6 +23,15 @@ export interface FormModel {
     [key: string]: FormField;
 }
 
+export interface Form {
+    id: string;
+    title: string;
+    description?: string;
+    model: FormModel;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 export interface FormErrors {
     [key: string]: string;
 }

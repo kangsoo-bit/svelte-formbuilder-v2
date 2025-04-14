@@ -1,74 +1,91 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
-
+<!--
+@component
+메인 페이지 - 저장된 폼 목록을 보여주고 새 폼을 생성할 수 있습니다.
+-->
 <script lang="ts">
-    import FormBuilder from '$lib/components/FormBuilder.svelte';
-    import FormViewer from '$lib/components/FormViewer.svelte';
-    import type { GetFormFunction } from '$lib/types';
+    import type { Form } from '$lib/types';
 
-    let activeTab = $state<'builder' | 'viewer'>('builder');
-    let formName = $state('');
-    let templates = $state<string[]>(['contactform', 'toolbarbuttons']);
+    let forms = $state<Form[]>([]);
+    let loading = $state(true);
+    let error = $state<string | null>(null);
 
-    const getForm: GetFormFunction = async (name: string) => {
-        // 실제 구현에서는 API 호출로 대체
-        return {
-            model: {
-                name: {
-                    type: 'text',
-                    label: '이름'
-                },
-                email: {
-                    type: 'text',
-                    label: '이메일'
-                },
-                subscribe: {
-                    type: 'checkbox',
-                    label: '뉴스레터 구독'
-                },
-                preference: {
-                    type: 'select',
-                    label: '선호도',
-                    options: [
-                        { value: 'low', label: '낮음' },
-                        { value: 'medium', label: '중간' },
-                        { value: 'high', label: '높음' }
-                    ]
-                }
-            },
-            initialData: {
-                name: '',
-                email: '',
-                subscribe: false,
-                preference: 'medium'
-            }
-        };
-    };
+    // 폼 목록 불러오기
+    async function loadForms() {
+        try {
+            loading = true;
+            const response = await fetch('/api/forms');
+            if (!response.ok) throw new Error('폼 목록을 불러오는데 실패했습니다');
+            forms = await response.json();
+        } catch (err) {
+            error = err instanceof Error ? err.message : '알 수 없는 에러가 발생했습니다';
+        } finally {
+            loading = false;
+        }
+    }
+
+    // 폼 삭제
+    async function deleteForm(id: string) {
+        if (!confirm('정말 이 폼을 삭제하시겠습니까?')) return;
+        
+        try {
+            const response = await fetch(`/api/forms/${id}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('폼 삭제에 실패했습니다');
+            await loadForms(); // 목록 새로고침
+        } catch (err) {
+            error = err instanceof Error ? err.message : '알 수 없는 에러가 발생했습니다';
+        }
+    }
+
+    // 컴포넌트 마운트시 폼 목록 로드
+    $effect(() => {
+        loadForms();
+    });
 </script>
 
-<div class="container">
-    <div class="tabs">
-        <button
-            class:active={activeTab === 'builder'}
-            onclick={() => activeTab = 'builder'}
-        >
-            폼 빌더
-        </button>
-        <button
-            class:active={activeTab === 'viewer'}
-            onclick={() => activeTab = 'viewer'}
-        >
-            폼 미리보기
-        </button>
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold">폼 목록</h1>
+        <a href="/forms/new" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+            새 폼 만들기
+        </a>
     </div>
 
-    <div class="content">
-        {#if activeTab === 'builder'}
-            <FormBuilder {formName} {templates} />
-        {:else}
-            <FormViewer {formName} {templates} getFormFunc={getForm} />
-        {/if}
-    </div>
+    {#if loading}
+        <div class="text-center py-8">
+            <span class="text-gray-600">로딩 중...</span>
+        </div>
+    {:else if error}
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {error}
+        </div>
+    {:else if forms.length === 0}
+        <div class="text-center py-8">
+            <p class="text-gray-600">저장된 폼이 없습니다.</p>
+            <a href="/forms/new" class="text-blue-500 hover:underline mt-2 inline-block">
+                첫 번째 폼을 만들어보세요!
+            </a>
+        </div>
+    {:else}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {#each forms as form}
+                <div class="border rounded-lg p-6 hover:shadow-lg transition-shadow">
+                    <h2 class="text-xl font-semibold mb-2">{form.title || '제목 없음'}</h2>
+                    <p class="text-gray-600 mb-4">{form.description || '설명 없음'}</p>
+                    <div class="flex justify-end space-x-2">
+                        <a href="/forms/{form.id}" class="text-blue-500 hover:underline">
+                            편집
+                        </a>
+                        <button 
+                            class="text-red-500 hover:underline"
+                            on:click={() => deleteForm(form.id)}
+                        >
+                            삭제
+                        </button>
+                    </div>
+                </div>
+            {/each}
+        </div>
+    {/if}
 </div>
 
 <style>
