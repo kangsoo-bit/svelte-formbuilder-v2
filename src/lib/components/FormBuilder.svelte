@@ -498,21 +498,15 @@
 					class="control-wrapper"
 					class:selected={selectedControlIds.includes(controlId)}
 					style="
-						position: absolute; 
-						left: {typedControl.position?.x || 0}px; 
-						top: {typedControl.position?.y || 0}px; 
+						left: {typedControl.position?.x || 0}px;
+						top: {typedControl.position?.y || 0}px;
 						z-index: {typedControl.position?.zIndex || 1};
 						width: {typedControl.style?.width || '200px'};
 						height: {typedControl.style?.height || '40px'};
-						{typedControl.style?.margin ? `margin: ${typedControl.style.margin};` : ''}
-						{typedControl.style?.padding ? `padding: ${typedControl.style.padding};` : ''}
-						{typedControl.style?.border ? `border: ${typedControl.style.border};` : ''}
-						{typedControl.style?.borderRadius ? `border-radius: ${typedControl.style.borderRadius};` : ''}
-						{typedControl.style?.backgroundColor ? `background-color: ${typedControl.style.backgroundColor};` : ''}
 					"
 					draggable="true"
 					onmousedown={(e) => startPositionDrag(e, controlId)}
-					ondragstart={(e) => handleDragStart(e, typedControl.type)}
+					ondragstart={(e) => handleControlDragStart(e, controlId)}
 					ondragend={handleControlDragEnd}
 					onclick={(e) => handleControlClick(e, controlId)}
 					onkeydown={(e) => handleControlKeyDown(e, controlId)}
@@ -527,9 +521,21 @@
 						<div class="resize-handle sw" onmousedown={(e) => startResize(e, controlId, 'sw')} />
 						<div class="resize-handle nw" onmousedown={(e) => startResize(e, controlId, 'nw')} />
 					{/if}
-					<div class="control-content">
+					<div class="control-content" style="
+						margin: {typedControl.style?.margin || '0'};
+						padding: {typedControl.style?.padding || '0.5rem'};
+						border: {typedControl.style?.border || '1px solid #e5e7eb'};
+						border-radius: {typedControl.style?.borderRadius || '0.375rem'};
+						background-color: {typedControl.style?.backgroundColor || 'white'};
+						height: 100%;
+						box-sizing: border-box;
+					">
 						<div class="control-header">
-							<label class="control-label">{typedControl.label}</label>
+							<label class="control-label" style="
+								font-size: {typedControl.style?.fontSize || '0.875rem'};
+								font-weight: {typedControl.style?.fontWeight || '500'};
+								color: {typedControl.style?.color || '#374151'};
+							">{typedControl.label}</label>
 							<button
 								class="delete-button"
 								onclick={(e) => {
@@ -550,13 +556,14 @@
 									style="
 										width: 100%;
 										height: 100%;
-										{typedControl.style?.fontSize ? `font-size: ${typedControl.style.fontSize};` : ''}
-										{typedControl.style?.fontWeight ? `font-weight: ${typedControl.style.fontWeight};` : ''}
-										{typedControl.style?.color ? `color: ${typedControl.style.color};` : ''}
-										{typedControl.style?.backgroundColor ? `background-color: ${typedControl.style.backgroundColor};` : ''}
-										{typedControl.style?.border ? `border: ${typedControl.style.border};` : ''}
-										{typedControl.style?.borderRadius ? `border-radius: ${typedControl.style.borderRadius};` : ''}
-										{typedControl.style?.padding ? `padding: ${typedControl.style.padding};` : ''}
+										font-size: {typedControl.style?.fontSize || '0.875rem'};
+										font-weight: {typedControl.style?.fontWeight || 'normal'};
+										color: {typedControl.style?.color || '#4b5563'};
+										background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
+										border: {typedControl.style?.border || '1px solid #d1d5db'};
+										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
+										padding: {typedControl.style?.padding || '0.5rem'};
+										box-sizing: border-box;
 									"
 									disabled
 								/>
@@ -571,13 +578,14 @@
 									style="
 										width: 100%;
 										height: 100%;
-										{typedControl.style?.fontSize ? `font-size: ${typedControl.style.fontSize};` : ''}
-										{typedControl.style?.fontWeight ? `font-weight: ${typedControl.style.fontWeight};` : ''}
-										{typedControl.style?.color ? `color: ${typedControl.style.color};` : ''}
-										{typedControl.style?.backgroundColor ? `background-color: ${typedControl.style.backgroundColor};` : ''}
-										{typedControl.style?.border ? `border: ${typedControl.style.border};` : ''}
-										{typedControl.style?.borderRadius ? `border-radius: ${typedControl.style.borderRadius};` : ''}
-										{typedControl.style?.padding ? `padding: ${typedControl.style.padding};` : ''}
+										font-size: {typedControl.style?.fontSize || '0.875rem'};
+										font-weight: {typedControl.style?.fontWeight || 'normal'};
+										color: {typedControl.style?.color || '#4b5563'};
+										background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
+										border: {typedControl.style?.border || '1px solid #d1d5db'};
+										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
+										padding: {typedControl.style?.padding || '0.5rem'};
+										box-sizing: border-box;
 									"
 									disabled
 								/>
@@ -588,13 +596,15 @@
 									style="
 										width: 100%;
 										height: 100%;
-										{typedControl.style?.fontSize ? `font-size: ${typedControl.style.fontSize};` : ''}
-										{typedControl.style?.fontWeight ? `font-weight: ${typedControl.style.fontWeight};` : ''}
-										{typedControl.style?.color ? `color: ${typedControl.style.color};` : ''}
-										{typedControl.style?.backgroundColor ? `background-color: ${typedControl.style.backgroundColor};` : ''}
-										{typedControl.style?.border ? `border: ${typedControl.style.border};` : ''}
-										{typedControl.style?.borderRadius ? `border-radius: ${typedControl.style.borderRadius};` : ''}
-										{typedControl.style?.padding ? `padding: ${typedControl.style.padding};` : ''}
+										font-size: {typedControl.style?.fontSize || '0.875rem'};
+										font-weight: {typedControl.style?.fontWeight || 'normal'};
+										color: {typedControl.style?.color || '#4b5563'};
+										background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
+										border: {typedControl.style?.border || '1px solid #d1d5db'};
+										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
+										padding: {typedControl.style?.padding || '0.5rem'};
+										box-sizing: border-box;
+										resize: none;
 									"
 									disabled
 								></textarea>
@@ -604,13 +614,15 @@
 									style="
 										width: 100%;
 										height: 100%;
-										{typedControl.style?.fontSize ? `font-size: ${typedControl.style.fontSize};` : ''}
-										{typedControl.style?.fontWeight ? `font-weight: ${typedControl.style.fontWeight};` : ''}
-										{typedControl.style?.color ? `color: ${typedControl.style.color};` : ''}
-										{typedControl.style?.backgroundColor ? `background-color: ${typedControl.style.backgroundColor};` : ''}
-										{typedControl.style?.border ? `border: ${typedControl.style.border};` : ''}
-										{typedControl.style?.borderRadius ? `border-radius: ${typedControl.style.borderRadius};` : ''}
-										{typedControl.style?.padding ? `padding: ${typedControl.style.padding};` : ''}
+										font-size: {typedControl.style?.fontSize || '0.875rem'};
+										font-weight: {typedControl.style?.fontWeight || 'normal'};
+										color: {typedControl.style?.color || '#4b5563'};
+										background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
+										border: {typedControl.style?.border || '1px solid #d1d5db'};
+										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
+										padding: {typedControl.style?.padding || '0.5rem'};
+										box-sizing: border-box;
+										cursor: not-allowed;
 									"
 									disabled
 								>
@@ -623,15 +635,22 @@
 								<label 
 									class="form-checkbox"
 									style="
-										{typedControl.style?.fontSize ? `font-size: ${typedControl.style.fontSize};` : ''}
-										{typedControl.style?.fontWeight ? `font-weight: ${typedControl.style.fontWeight};` : ''}
-										{typedControl.style?.color ? `color: ${typedControl.style.color};` : ''}
+										display: flex;
+										align-items: center;
+										gap: 0.5rem;
+										font-size: {typedControl.style?.fontSize || '0.875rem'};
+										font-weight: {typedControl.style?.fontWeight || 'normal'};
+										color: {typedControl.style?.color || '#4b5563'};
+										cursor: not-allowed;
 									"
 								>
 									<input 
 										type="checkbox"
 										style="
-											{typedControl.style?.accentColor ? `accent-color: ${typedControl.style.accentColor};` : ''}
+											width: 1rem;
+											height: 1rem;
+											accent-color: {typedControl.style?.accentColor || '#2563eb'};
+											cursor: not-allowed;
 										"
 										disabled 
 									/>
@@ -641,18 +660,29 @@
 								<div 
 									class="form-radio-group"
 									style="
-										{typedControl.style?.fontSize ? `font-size: ${typedControl.style.fontSize};` : ''}
-										{typedControl.style?.fontWeight ? `font-weight: ${typedControl.style.fontWeight};` : ''}
-										{typedControl.style?.color ? `color: ${typedControl.style.color};` : ''}
+										display: flex;
+										flex-direction: column;
+										gap: 0.5rem;
+										font-size: {typedControl.style?.fontSize || '0.875rem'};
+										font-weight: {typedControl.style?.fontWeight || 'normal'};
+										color: {typedControl.style?.color || '#4b5563'};
 									"
 								>
 									{#each typedControl.options || [] as option}
-										<label class="form-radio">
+										<label class="form-radio" style="
+											display: flex;
+											align-items: center;
+											gap: 0.5rem;
+											cursor: not-allowed;
+										">
 											<input 
 												type="radio"
 												name={controlId}
 												style="
-													{typedControl.style?.accentColor ? `accent-color: ${typedControl.style.accentColor};` : ''}
+													width: 1rem;
+													height: 1rem;
+													accent-color: {typedControl.style?.accentColor || '#2563eb'};
+													cursor: not-allowed;
 												"
 												disabled 
 											/>
@@ -716,11 +746,18 @@
 	}
 
 	.control-wrapper {
+		position: absolute;
 		cursor: move;
 		user-select: none;
 		min-width: 100px;
-		position: relative;
 		box-sizing: border-box;
+		transition: box-shadow 0.2s ease;
+	}
+
+	.control-wrapper.selected {
+		outline: 2px solid #2563eb;
+		outline-offset: 2px;
+		box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 	}
 
 	.control-content {
@@ -820,11 +857,6 @@
 		width: 1rem;
 		height: 1rem;
 		cursor: not-allowed;
-	}
-
-	.control-wrapper.selected {
-		outline: 2px solid #2563eb;
-		outline-offset: 2px;
 	}
 
 	.resize-handle {
