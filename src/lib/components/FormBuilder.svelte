@@ -6,6 +6,8 @@
 	let { form = $bindable() } = $props();
 	let formPreviewElement: HTMLElement;
 	let maxZIndex = $state(1);
+	let controlOrder = $state<string[]>([]);
+	let draggedControlId = $state<string | null>(null);
 
 	let editingControlId = $state<string | null>(null);
 	let draggedControl = $state<string | null>(null);
@@ -252,9 +254,9 @@
 					class="control-wrapper"
 					style="position: absolute; left: {typedControl.position?.x || 0}px; top: {typedControl.position?.y || 0}px; z-index: {typedControl.position?.zIndex || 1}; width: {typedControl.style?.width || 'auto'}; height: {typedControl.style?.height || 'auto'};"
 					draggable="true"
-					on:mousedown={(e) => startPositionDrag(e, controlId)}
-					on:dragstart={(e) => handleDragStart(e, typedControl.type)}
-					on:dragend={handleControlDragEnd}
+					onmousedown={(e) => startPositionDrag(e, controlId)}
+					ondragstart={(e) => handleDragStart(e, typedControl.type)}
+					ondragend={handleControlDragEnd}
 				>
 					<div class="control-content p-4 bg-white border rounded shadow-sm">
 						<div class="control-header flex justify-between items-center mb-2">
@@ -319,8 +321,10 @@
 		{#if editingControlId && form?.model[editingControlId]}
 			<ControlProperties
 				control={form.model[editingControlId] as FormField}
-				onUpdate={(updatedControl) => handleControlUpdate(editingControlId, updatedControl)}
-				onClose={handleCloseProperties}
+				onUpdate={(updatedControl: FormField) => {
+					if (editingControlId) handleControlUpdate(editingControlId, updatedControl);
+				}}
+				onclose={handleCloseProperties}
 			/>
 		{/if}
 	</div>

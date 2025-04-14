@@ -2,8 +2,8 @@
 <script lang="ts">
 	import type { FormField } from '$lib/types';
 
-	let { control, onUpdate } = $props();
-	let editingControl = { ...control };
+	let { control, onUpdate, onclose } = $props();
+	let editingControl = $state({ ...control });
 
 	function updateControl() {
 		onUpdate(editingControl);
@@ -55,7 +55,10 @@
 </script>
 
 <div class="properties-editor">
-	<h3>속성 편집</h3>
+	<div class="header">
+		<h3>속성 편집</h3>
+		<button class="close-button" onclick={onclose}>×</button>
+	</div>
 	
 	<div class="property-group">
 		<label>
@@ -150,6 +153,29 @@
 		height: 100%;
 		background: white;
 		font-size: 0.875rem;
+		position: relative;
+	}
+
+	.header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 1rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid #e5e7eb;
+	}
+
+	.close-button {
+		background: none;
+		border: none;
+		font-size: 1.5rem;
+		color: #6b7280;
+		cursor: pointer;
+		padding: 0.25rem;
+	}
+
+	.close-button:hover {
+		color: #374151;
 	}
 
 	h3 {
