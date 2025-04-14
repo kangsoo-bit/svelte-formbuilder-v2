@@ -1,6 +1,6 @@
 <!-- Form.svelte -->
 <script lang="ts">
-    import type { FormModel, FormData, FormErrors, FormProps, FormField } from '$lib/types';
+    import type { FormModel, FormData, FormErrors, FormProps, FormField } from '$lib/types/form';
 
     let props = $props();
     let formName = props.formName ?? '';

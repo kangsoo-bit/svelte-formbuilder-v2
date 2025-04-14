@@ -1,6 +1,6 @@
 <!-- FormBuilder.svelte -->
 <script lang="ts">
-	import type { FormData, FormModel, FormErrors, FormBuilderProps, FormField } from '$lib/types';
+	import type { FormData, FormModel, FormErrors, FormBuilderProps, FormField } from '$lib/types/form';
 	import ControlProperties from './ControlProperties.svelte';
 
 	let props = $props();
@@ -82,6 +82,7 @@
 		// 새로운 컨트롤 추가
 		const controlId = `${controlType}_${Date.now()}`;
 		const newControl: FormField = {
+			id: controlId,
 			type: controlType,
 			label: `새 ${controlType}`,
 			...(controlType === 'select' ? {
@@ -143,9 +144,10 @@
 			{/if}
 			<!-- 폼 미리보기 영역 -->
 			{#each Object.entries(model) as [controlId, control]}
+				{@const typedControl = control as FormField}
 				<div class="form-control">
 					<div class="control-header">
-						<span>{control.label}</span>
+						<span>{typedControl.label}</span>
 						<div class="control-actions">
 							<button class="edit-btn" onclick={() => handleEditControl(controlId)}>
 								편집
@@ -153,21 +155,21 @@
 							<button class="delete-btn" onclick={() => deleteControl(controlId)}>삭제</button>
 						</div>
 					</div>
-					{#if control.type === 'text'}
-						<input type="text" placeholder={control.label} disabled={readOnly} />
-					{:else if control.type === 'checkbox'}
+					{#if typedControl.type === 'text'}
+						<input type="text" placeholder={typedControl.label} disabled={readOnly} />
+					{:else if typedControl.type === 'checkbox'}
 						<label>
 							<input type="checkbox" disabled={readOnly} />
-							{control.label}
+							{typedControl.label}
 						</label>
-					{:else if control.type === 'radio'}
+					{:else if typedControl.type === 'radio'}
 						<label>
 							<input type="radio" disabled={readOnly} />
-							{control.label}
+							{typedControl.label}
 						</label>
-					{:else if control.type === 'select' && control.options}
+					{:else if typedControl.type === 'select' && typedControl.options}
 						<select disabled={readOnly}>
-							{#each control.options as option}
+							{#each typedControl.options as option}
 								<option value={option.value}>{option.label}</option>
 							{/each}
 						</select>

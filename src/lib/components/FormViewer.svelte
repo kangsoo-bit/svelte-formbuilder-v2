@@ -1,13 +1,14 @@
 <!-- FormViewer.svelte -->
 <script lang="ts">
     import Form from './Form.svelte';
-    import type { FormData, FormModel, FormErrors, FormViewerProps } from '$lib/types';
+    import type { FormData, FormModel, FormErrors, FormViewerProps, GetFormFunction } from '$lib/types/form';
 
+    let props = $props();
     let { 
         formName = '', 
         templates = [] as string[], 
         getFormFunc = undefined as GetFormFunction | undefined 
-    } = $props<FormViewerProps>();
+    } = props;
     
     let data = $state({} as FormData);
     let model = $state({} as FormModel);
