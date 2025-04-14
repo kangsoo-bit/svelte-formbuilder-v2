@@ -11,25 +11,53 @@
     "checkbox_1744618180268": {
       "id": "checkbox_1744618180268",
       "type": "checkbox",
-      "label": "새 checkbox"
+      "label": "성별체크"
     },
     "radio_1744618181722": {
       "id": "radio_1744618181722",
       "type": "radio",
-      "label": "새 radio"
+      "label": "성별옵션",
+      "options": [
+        {
+          "value": "남",
+          "label": "M"
+        },
+        {
+          "value": "여",
+          "label": "F"
+        }
+      ]
     },
     "select_1744618183196": {
       "id": "select_1744618183196",
       "type": "select",
-      "label": "새 select",
+      "label": "성별",
       "options": [
         {
-          "value": "option1",
-          "label": "옵션 1"
+          "value": "남",
+          "label": "M"
         },
         {
-          "value": "option2",
-          "label": "옵션 2"
+          "value": "여",
+          "label": "F"
+        }
+      ]
+    },
+    "text_1744619189741": {
+      "type": "text",
+      "label": "새 text"
+    },
+    "select_1744619363652": {
+      "type": "select",
+      "label": "선택",
+      "options": [
+        {
+          "value": "선택1",
+          "label": "1"
+        },
+        {
+          "value": "선택2",
+          "label": "2"
         }
       ]
     }

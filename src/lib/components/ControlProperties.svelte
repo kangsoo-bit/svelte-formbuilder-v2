@@ -8,7 +8,22 @@
 		onClose: () => void;
 	}>();
 
-	let editingControl = $state<FormField>({ ...control });
+	let editingControl = $state<FormField>({
+		...control,
+		style: {
+			width: control.style?.width || '200px',
+			height: control.style?.height || 'auto',
+			marginTop: control.style?.marginTop || '0',
+			marginBottom: control.style?.marginBottom || '0',
+			marginLeft: control.style?.marginLeft || '0',
+			marginRight: control.style?.marginRight || '0'
+		},
+		position: {
+			x: control.position?.x || 0,
+			y: control.position?.y || 0,
+			zIndex: control.position?.zIndex || 1
+		}
+	});
 
 	function handleUpdate() {
 		onUpdate(editingControl);
@@ -35,6 +50,20 @@
 			i === index ? { ...option, [field]: value } : option
 		);
 	}
+
+	function updateStyle(property: string, value: string) {
+		editingControl.style = {
+			...editingControl.style,
+			[property]: value
+		};
+	}
+
+	function updatePosition(property: 'x' | 'y' | 'zIndex', value: number) {
+		editingControl.position = {
+			...editingControl.position,
+			[property]: value
+		};
+	}
 </script>
 
 <div class="properties-editor">
@@ -57,6 +86,69 @@
 			class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 			bind:value={editingControl.label}
 		/>
+	</div>
+
+	<div class="form-group mb-4">
+		<label class="block text-sm font-medium text-gray-700 mb-1">
+			위치
+		</label>
+		<div class="grid grid-cols-2 gap-4">
+			<div>
+				<label class="text-sm text-gray-600">X 좌표 (px)</label>
+				<input
+					type="number"
+					class="w-full p-2 border rounded"
+					value={editingControl.position?.x}
+					oninput={(e) => updatePosition('x', parseInt(e.currentTarget.value) || 0)}
+				/>
+			</div>
+			<div>
+				<label class="text-sm text-gray-600">Y 좌표 (px)</label>
+				<input
+					type="number"
+					class="w-full p-2 border rounded"
+					value={editingControl.position?.y}
+					oninput={(e) => updatePosition('y', parseInt(e.currentTarget.value) || 0)}
+				/>
+			</div>
+			<div>
+				<label class="text-sm text-gray-600">Z-Index</label>
+				<input
+					type="number"
+					class="w-full p-2 border rounded"
+					value={editingControl.position?.zIndex}
+					oninput={(e) => updatePosition('zIndex', parseInt(e.currentTarget.value) || 1)}
+				/>
+			</div>
+		</div>
+	</div>
+
+	<div class="form-group mb-4">
+		<label class="block text-sm font-medium text-gray-700 mb-1">
+			크기
+		</label>
+		<div class="grid grid-cols-2 gap-4">
+			<div>
+				<label class="text-sm text-gray-600">너비</label>
+				<input
+					type="text"
+					class="w-full p-2 border rounded"
+					value={editingControl.style?.width}
+					oninput={(e) => updateStyle('width', e.currentTarget.value)}
+					placeholder="예: 200px, 100%"
+				/>
+			</div>
+			<div>
+				<label class="text-sm text-gray-600">높이</label>
+				<input
+					type="text"
+					class="w-full p-2 border rounded"
+					value={editingControl.style?.height}
+					oninput={(e) => updateStyle('height', e.currentTarget.value)}
+					placeholder="예: auto, 100px"
+				/>
+			</div>
+		</div>
 	</div>
 
 	{#if editingControl.type === 'select' || editingControl.type === 'radio'}

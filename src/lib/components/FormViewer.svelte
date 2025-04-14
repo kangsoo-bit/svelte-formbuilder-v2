@@ -27,7 +27,16 @@
     <form on:submit|preventDefault={handleSubmit} class="space-y-6">
         {#each Object.entries(form.model) as [fieldId, field]}
             {@const typedField = field as FormField}
-            <div class="form-field">
+            <div class="form-field"
+                style="
+                    width: {typedField.style?.width || '100%'};
+                    height: {typedField.style?.height || 'auto'};
+                    margin-top: {typedField.style?.marginTop || '0'};
+                    margin-bottom: {typedField.style?.marginBottom || '0'};
+                    margin-left: {typedField.style?.marginLeft || '0'};
+                    margin-right: {typedField.style?.marginRight || '0'};
+                "
+            >
                 <label class="block text-sm font-medium text-gray-700 mb-1" for={fieldId}>
                     {typedField.label}
                 </label>
