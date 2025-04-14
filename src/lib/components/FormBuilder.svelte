@@ -244,56 +244,17 @@
 </script>
 
 <div class="form-builder">
-	<div class="control-panel">
-		<h3 class="text-lg font-semibold mb-4">컴포넌트</h3>
-		<div class="grid grid-cols-2 gap-2">
-			{#each controlTypes as { type, label }}
-				<div
-					class="control-item p-2 bg-gray-100 rounded cursor-move"
-					draggable="true"
-					ondragstart={(e) => handleDragStart(e, type)}
-				>
-					{label}
-				</div>
-			{/each}
-		</div>
-	</div>
-
-	<div class="form-preview"
-		bind:this={formPreviewElement}
-		ondragover={handleDragOver}
-		ondragleave={handleDragLeave}
-		ondrop={handleDrop}
-		onmouseup={handleMouseUp}
-		class:drop-target={dropTarget === 'preview'}
-	>
-		<div class="form-header mb-6">
-			<input
-				type="text"
-				class="text-2xl font-bold w-full mb-2 p-2 border-b border-transparent focus:border-blue-500 outline-none"
-				placeholder="폼 제목"
-				bind:value={form.title}
-			/>
-			<textarea
-				class="w-full p-2 border-b border-transparent focus:border-blue-500 outline-none resize-none"
-				placeholder="폼 설명"
-				bind:value={form.description}
-			></textarea>
-		</div>
-
-		{#if form?.model}
+	<div class="form-preview">
+		<div class="form-preview-inner" bind:this={formPreviewElement}>
 			{#each Object.entries(form.model) as [controlId, control]}
 				{@const typedControl = control as FormField}
-				<div class="form-control"
-					style="
-						position: absolute;
-						left: {typedControl.position?.x || 0}px;
-						top: {typedControl.position?.y || 0}px;
-						z-index: {typedControl.position?.zIndex || 1};
-						width: {typedControl.style?.width || '200px'};
-						{typedControl.style?.height ? `height: ${typedControl.style.height};` : ''}
-					"
-					onmousedown={(e) => startPositionDrag(e, controlId)}
+				<div 
+					class="control-wrapper"
+					style="position: absolute; left: {typedControl.position?.x || 0}px; top: {typedControl.position?.y || 0}px; z-index: {typedControl.position?.zIndex || 1}; width: {typedControl.style?.width || 'auto'}; height: {typedControl.style?.height || 'auto'};"
+					draggable="true"
+					on:mousedown={(e) => startPositionDrag(e, controlId)}
+					on:dragstart={(e) => handleDragStart(e, typedControl.type)}
+					on:dragend={handleControlDragEnd}
 				>
 					<div class="control-content p-4 bg-white border rounded shadow-sm">
 						<div class="control-header flex justify-between items-center mb-2">
@@ -351,76 +312,63 @@
 					</div>
 				</div>
 			{/each}
-		{/if}
+		</div>
 	</div>
-
-	{#if editingControlId && form?.model[editingControlId]}
-		<div class="properties-panel">
+	
+	<div class="properties-panel">
+		{#if editingControlId && form?.model[editingControlId]}
 			<ControlProperties
 				control={form.model[editingControlId] as FormField}
 				onUpdate={(updatedControl) => handleControlUpdate(editingControlId, updatedControl)}
 				onClose={handleCloseProperties}
 			/>
-		</div>
-	{/if}
+		{/if}
+	</div>
 </div>
 
 <style>
 	.form-builder {
-		display: grid;
-		grid-template-columns: 250px 1fr;
-		gap: 2rem;
+		display: flex;
+		gap: 1rem;
+		height: 100vh;
 		padding: 1rem;
-		height: 100%;
-	}
-
-	.control-panel {
-		background: white;
-		padding: 1rem;
-		border-radius: 0.5rem;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-	}
-
-	.control-item {
-		transition: all 0.2s;
-	}
-
-	.control-item:hover {
-		background-color: #f3f4f6;
 	}
 
 	.form-preview {
-		background: white;
-		padding: 2rem;
-		border-radius: 0.5rem;
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-		min-height: 500px;
+		flex: 1;
 		position: relative;
+		border: 1px solid #ccc;
+		border-radius: 0.5rem;
+		overflow: hidden;
+		background: #f5f5f5;
 	}
 
-	.form-preview.drop-target {
-		background-color: #f3f4f6;
-		border: 2px dashed #6b7280;
-	}
-
-	.form-control {
-		cursor: move;
-		user-select: none;
-	}
-
-	.form-control:hover .control-content {
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	.form-preview-inner {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		min-height: 500px;
 	}
 
 	.properties-panel {
-		position: fixed;
-		top: 0;
-		right: 0;
 		width: 300px;
-		height: 100vh;
-		background: white;
-		box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-		padding: 1rem;
+		border-left: 1px solid #ccc;
+		padding-left: 1rem;
 		overflow-y: auto;
+	}
+
+	.control-wrapper {
+		cursor: move;
+		background: white;
+		border: 1px solid transparent;
+		border-radius: 0.25rem;
+		padding: 0.5rem;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+		transition: border-color 0.2s, box-shadow 0.2s;
+	}
+
+	.control-wrapper:hover {
+		border-color: #2563eb;
+		box-shadow: 0 4px 6px rgba(37,99,235,0.1);
 	}
 </style>

@@ -2,53 +2,11 @@
 <script lang="ts">
 	import type { FormField } from '$lib/types';
 
-	let { control = $bindable(), onUpdate, onClose } = $props<{
-		control: FormField;
-		onUpdate: (control: FormField) => void;
-		onClose: () => void;
-	}>();
+	let { control, onUpdate } = $props();
+	let editingControl = { ...control };
 
-	let editingControl = $state<FormField>({
-		...control,
-		style: {
-			width: control.style?.width || '200px',
-			height: control.style?.height || 'auto',
-			marginTop: control.style?.marginTop || '0',
-			marginBottom: control.style?.marginBottom || '0',
-			marginLeft: control.style?.marginLeft || '0',
-			marginRight: control.style?.marginRight || '0'
-		},
-		position: {
-			x: control.position?.x || 0,
-			y: control.position?.y || 0,
-			zIndex: control.position?.zIndex || 1
-		}
-	});
-
-	function handleUpdate() {
+	function updateControl() {
 		onUpdate(editingControl);
-	}
-
-	function addOption() {
-		if (!editingControl.options) {
-			editingControl.options = [];
-		}
-		editingControl.options = [
-			...editingControl.options,
-			{ value: `option${editingControl.options.length + 1}`, label: `옵션 ${editingControl.options.length + 1}` }
-		];
-	}
-
-	function removeOption(index: number) {
-		if (!editingControl.options) return;
-		editingControl.options = editingControl.options.filter((_, i) => i !== index);
-	}
-
-	function updateOption(index: number, field: 'value' | 'label', value: string) {
-		if (!editingControl.options) return;
-		editingControl.options = editingControl.options.map((option, i) =>
-			i === index ? { ...option, [field]: value } : option
-		);
 	}
 
 	function updateStyle(property: string, value: string) {
@@ -56,6 +14,7 @@
 			...editingControl.style,
 			[property]: value
 		};
+		updateControl();
 	}
 
 	function updatePosition(property: 'x' | 'y' | 'zIndex', value: number) {
@@ -63,265 +22,206 @@
 			...editingControl.position,
 			[property]: value
 		};
+		updateControl();
+	}
+
+	function addOption() {
+		const options = [...(editingControl.options || [])];
+		options.push({ value: '', label: '' });
+		editingControl.options = options;
+		updateControl();
+	}
+
+	function removeOption(index: number) {
+		const options = [...(editingControl.options || [])];
+		options.splice(index, 1);
+		editingControl.options = options;
+		updateControl();
+	}
+
+	function updateOptionValue(index: number, value: string) {
+		const options = [...(editingControl.options || [])];
+		options[index] = { ...options[index], value };
+		editingControl.options = options;
+		updateControl();
+	}
+
+	function updateOptionLabel(index: number, label: string) {
+		const options = [...(editingControl.options || [])];
+		options[index] = { ...options[index], label };
+		editingControl.options = options;
+		updateControl();
 	}
 </script>
 
 <div class="properties-editor">
-	<div class="header flex justify-between items-center mb-6">
-		<h3 class="text-lg font-semibold">속성 편집</h3>
-		<button
-			class="text-gray-500 hover:text-gray-700"
-			onclick={onClose}
-		>
-			✕
-		</button>
-	</div>
-
-	<div class="form-group mb-4">
-		<label class="block text-sm font-medium text-gray-700 mb-1">
+	<h3>속성 편집</h3>
+	
+	<div class="property-group">
+		<label>
 			라벨
+			<input 
+				type="text" 
+				value={editingControl.label} 
+				oninput={(e) => {
+					editingControl.label = e.currentTarget.value;
+					updateControl();
+				}}
+			/>
 		</label>
-		<input
-			type="text"
-			class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-			bind:value={editingControl.label}
-		/>
 	</div>
 
-	<div class="form-group mb-4">
-		<label class="block text-sm font-medium text-gray-700 mb-1">
-			위치
+	<div class="property-group">
+		<h4>크기</h4>
+		<label>
+			너비
+			<input 
+				type="text" 
+				value={editingControl.style?.width || 'auto'} 
+				oninput={(e) => updateStyle('width', e.currentTarget.value)}
+			/>
 		</label>
-		<div class="grid grid-cols-2 gap-4">
-			<div>
-				<label class="text-sm text-gray-600">X 좌표 (px)</label>
-				<input
-					type="number"
-					class="w-full p-2 border rounded"
-					value={editingControl.position?.x}
-					oninput={(e) => updatePosition('x', parseInt(e.currentTarget.value) || 0)}
-				/>
-			</div>
-			<div>
-				<label class="text-sm text-gray-600">Y 좌표 (px)</label>
-				<input
-					type="number"
-					class="w-full p-2 border rounded"
-					value={editingControl.position?.y}
-					oninput={(e) => updatePosition('y', parseInt(e.currentTarget.value) || 0)}
-				/>
-			</div>
-			<div>
-				<label class="text-sm text-gray-600">Z-Index</label>
-				<input
-					type="number"
-					class="w-full p-2 border rounded"
-					value={editingControl.position?.zIndex}
-					oninput={(e) => updatePosition('zIndex', parseInt(e.currentTarget.value) || 1)}
-				/>
-			</div>
-		</div>
+		<label>
+			높이
+			<input 
+				type="text" 
+				value={editingControl.style?.height || 'auto'} 
+				oninput={(e) => updateStyle('height', e.currentTarget.value)}
+			/>
+		</label>
 	</div>
 
-	<div class="form-group mb-4">
-		<label class="block text-sm font-medium text-gray-700 mb-1">
-			크기
+	<div class="property-group">
+		<h4>위치</h4>
+		<label>
+			X 좌표
+			<input 
+				type="number" 
+				value={editingControl.position?.x || 0} 
+				oninput={(e) => updatePosition('x', +e.currentTarget.value)}
+			/>
 		</label>
-		<div class="grid grid-cols-2 gap-4">
-			<div>
-				<label class="text-sm text-gray-600">너비</label>
-				<input
-					type="text"
-					class="w-full p-2 border rounded"
-					value={editingControl.style?.width}
-					oninput={(e) => updateStyle('width', e.currentTarget.value)}
-					placeholder="예: 200px, 100%"
-				/>
-			</div>
-			<div>
-				<label class="text-sm text-gray-600">높이</label>
-				<input
-					type="text"
-					class="w-full p-2 border rounded"
-					value={editingControl.style?.height}
-					oninput={(e) => updateStyle('height', e.currentTarget.value)}
-					placeholder="예: auto, 100px"
-				/>
-			</div>
-		</div>
+		<label>
+			Y 좌표
+			<input 
+				type="number" 
+				value={editingControl.position?.y || 0} 
+				oninput={(e) => updatePosition('y', +e.currentTarget.value)}
+			/>
+		</label>
+		<label>
+			Z-Index
+			<input 
+				type="number" 
+				value={editingControl.position?.zIndex || 1} 
+				oninput={(e) => updatePosition('zIndex', +e.currentTarget.value)}
+			/>
+		</label>
 	</div>
 
 	{#if editingControl.type === 'select' || editingControl.type === 'radio'}
-		<div class="form-group mb-4">
-			<label class="block text-sm font-medium text-gray-700 mb-1">
-				옵션
-			</label>
-			<div class="space-y-2">
-				{#each editingControl.options || [] as option, index}
-					<div class="flex gap-2">
-						<input
-							type="text"
-							class="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-							placeholder="값"
-							value={option.value}
-							oninput={(e) => updateOption(index, 'value', e.currentTarget.value)}
-						/>
-						<input
-							type="text"
-							class="flex-1 p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-							placeholder="라벨"
-							value={option.label}
-							oninput={(e) => updateOption(index, 'label', e.currentTarget.value)}
-						/>
-						<button
-							class="text-red-500 hover:text-red-700 px-2"
-							onclick={() => removeOption(index)}
-						>
-							✕
-						</button>
-					</div>
-				{/each}
-				<button
-					class="w-full p-2 border border-dashed rounded hover:bg-gray-50 text-gray-600"
-					onclick={addOption}
-				>
-					+ 옵션 추가
-				</button>
-			</div>
+		<div class="property-group">
+			<h4>옵션</h4>
+			<button onclick={addOption} class="add-option">+ 옵션 추가</button>
+			
+			{#each editingControl.options || [] as option, i}
+				<div class="option-row">
+					<input 
+						type="text" 
+						placeholder="값" 
+						value={option.value}
+						oninput={(e) => updateOptionValue(i, e.currentTarget.value)}
+					/>
+					<input 
+						type="text" 
+						placeholder="라벨" 
+						value={option.label}
+						oninput={(e) => updateOptionLabel(i, e.currentTarget.value)}
+					/>
+					<button onclick={() => removeOption(i)} class="remove-option">×</button>
+				</div>
+			{/each}
 		</div>
 	{/if}
-
-	<div class="flex justify-end space-x-2 mt-6">
-		<button
-			class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-			onclick={onClose}
-		>
-			취소
-		</button>
-		<button
-			class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-			onclick={handleUpdate}
-		>
-			저장
-		</button>
-	</div>
 </div>
 
 <style>
 	.properties-editor {
-		position: fixed;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
+		height: 100%;
 		background: white;
-		padding: 1.5rem;
-		border-radius: 0.5rem;
-		box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-		width: 90%;
-		max-width: 500px;
-		max-height: 90vh;
-		overflow-y: auto;
+		font-size: 0.875rem;
 	}
 
-	.header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
-	}
-
-	.header h3 {
-		margin: 0;
-		font-size: 1.2rem;
+	h3 {
+		font-size: 1.125rem;
 		font-weight: 600;
-		color: #666;
-	}
-
-	.form-group {
 		margin-bottom: 1rem;
+		padding-bottom: 0.5rem;
+		border-bottom: 1px solid #e5e7eb;
 	}
 
-	.form-group label {
+	h4 {
+		font-weight: 600;
+		margin-bottom: 0.5rem;
+		color: #4b5563;
+	}
+
+	.property-group {
+		margin-bottom: 1.5rem;
+	}
+
+	label {
 		display: block;
 		margin-bottom: 0.5rem;
-		color: #666;
+		color: #374151;
 	}
 
-	input[type="text"] {
+	input {
 		width: 100%;
 		padding: 0.5rem;
-		border: 1px solid #ddd;
-		border-radius: 4px;
-		font-size: 1rem;
+		border: 1px solid #d1d5db;
+		border-radius: 0.25rem;
+		margin-top: 0.25rem;
 	}
 
-	.options-list {
-		margin-bottom: 1rem;
+	input:focus {
+		outline: none;
+		border-color: #2563eb;
+		box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
 	}
 
-	.option-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.5rem;
-		background: #f5f5f5;
-		border-radius: 4px;
+	.option-row {
+		display: grid;
+		grid-template-columns: 1fr 1fr auto;
+		gap: 0.5rem;
 		margin-bottom: 0.5rem;
-	}
-
-	.remove-option {
-		background: none;
-		border: none;
-		color: #ff4444;
-		cursor: pointer;
-		padding: 0 0.5rem;
 	}
 
 	.add-option {
-		display: flex;
-		gap: 0.5rem;
-	}
-
-	.add-option input {
-		flex: 1;
-	}
-
-	.add-option button {
-		padding: 0.5rem 1rem;
-		background: #4CAF50;
-		color: white;
-		border: none;
-		border-radius: 4px;
+		width: 100%;
+		padding: 0.5rem;
+		background: #f3f4f6;
+		border: 1px dashed #9ca3af;
+		border-radius: 0.25rem;
+		color: #4b5563;
+		margin-bottom: 1rem;
 		cursor: pointer;
 	}
 
-	.button-group {
-		display: flex;
-		justify-content: flex-end;
-		gap: 0.5rem;
-		margin-top: 1rem;
+	.add-option:hover {
+		background: #e5e7eb;
 	}
 
-	.save-button,
-	.cancel-button {
-		padding: 0.5rem 1rem;
+	.remove-option {
+		padding: 0 0.5rem;
+		background: #fee2e2;
 		border: none;
-		border-radius: 4px;
+		border-radius: 0.25rem;
+		color: #dc2626;
 		cursor: pointer;
-		font-weight: 500;
 	}
 
-	.save-button {
-		background: #2196F3;
-		color: white;
-	}
-
-	.cancel-button {
-		background: #f5f5f5;
-		color: #333;
-	}
-
-	button:hover {
-		opacity: 0.9;
+	.remove-option:hover {
+		background: #fecaca;
 	}
 </style> 
