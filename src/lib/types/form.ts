@@ -1,4 +1,4 @@
-export type FormFieldType = 'text' | 'checkbox' | 'select' | 'radio';
+export type FormFieldType = 'text' | 'number' | 'checkbox' | 'select' | 'radio' | 'textarea';
 
 export interface FormField {
     id: string;
@@ -6,8 +6,25 @@ export interface FormField {
     label: string;
     placeholder?: string;
     required?: boolean;
+    min?: number;
+    max?: number;
+    step?: number;
     options?: { value: string; label: string; }[];
     value?: string | number | boolean;
+    position?: { x: number; y: number; zIndex: number };
+    style?: {
+        width?: string;
+        height?: string;
+        margin?: string;
+        padding?: string;
+        border?: string;
+        borderRadius?: string;
+        backgroundColor?: string;
+        fontSize?: string;
+        fontWeight?: string;
+        color?: string;
+        accentColor?: string;
+    };
 }
 
 export interface FormData {
