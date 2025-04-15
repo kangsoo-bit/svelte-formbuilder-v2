@@ -2,6 +2,7 @@ export type FormFieldType = 'text' | 'number' | 'checkbox' | 'select' | 'radio' 
 
 export interface FormField {
     id: string;
+    widgetId: string;
     type: FormFieldType;
     label: string;
     placeholder?: string;
@@ -25,6 +26,10 @@ export interface FormField {
         color?: string;
         accentColor?: string;
     };
+    initialDragPosition?: {
+        x: number;
+        y: number;
+    };
 }
 
 export interface FormData {
@@ -45,6 +50,7 @@ export interface Form {
     title: string;
     description?: string;
     model: FormModel;
+    widgetId: string;
     createdAt: Date;
     updatedAt: Date;
 }

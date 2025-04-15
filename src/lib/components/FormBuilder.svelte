@@ -3,7 +3,14 @@
 	import type { Form, FormField, FormFieldType } from '$lib/types/form';
 	import ControlProperties from './ControlProperties.svelte';
 
-	let { form = $bindable() } = $props();
+	let { form = $bindable({ 
+		model: {}, 
+		widgetId: crypto.randomUUID(),
+		title: '',
+		description: '',
+		createdAt: new Date(),
+		updatedAt: new Date()
+	}) } = $props();
 	let formPreviewElement: HTMLElement;
 	let maxZIndex = $state(1);
 	let controlOrder = $state<string[]>([]);
@@ -22,6 +29,20 @@
 	let selectionStart = $state({ x: 0, y: 0 });
 	let selectionEnd = $state({ x: 0, y: 0 });
 	let selectedControlIds = $state<string[]>([]);
+
+	// 폼 초기화 확인
+	$effect(() => {
+		if (!form.widgetId) {
+			form = {
+				...form,
+				widgetId: crypto.randomUUID(),
+				model: form.model || {}
+			};
+		}
+		if (!form.model) {
+			form.model = {};
+		}
+	});
 
 	// 컨트롤 순서 초기화
 	$effect(() => {
@@ -165,12 +186,17 @@
 			
 			const newControl: FormField = {
 				id: controlId,
+				widgetId: form.widgetId,
 				type: controlType as FormFieldType,
 				label: `새 ${controlType}`,
 				position: {
 					x: e.clientX - rect.left,
 					y: e.clientY - rect.top,
 					zIndex: maxZIndex++
+				},
+				style: {
+					width: '200px',
+					height: '40px'
 				},
 				...(controlType === 'select' || controlType === 'radio' ? {
 					options: [
@@ -192,7 +218,7 @@
 	}
 
 	function startSelection(e: MouseEvent) {
-		if (e.target !== formPreviewElement) return;
+		if (!formPreviewElement || e.target !== formPreviewElement) return;
 		
 		const rect = formPreviewElement.getBoundingClientRect();
 		const x = e.clientX - rect.left;
@@ -202,8 +228,8 @@
 		selectionStart = { x, y };
 		selectionEnd = { x, y };
 		
-		document.addEventListener('mousemove', handleSelectionMove);
-		document.addEventListener('mouseup', handleSelectionEnd);
+		window.addEventListener('mousemove', handleSelectionMove);
+		window.addEventListener('mouseup', handleSelectionEnd);
 	}
 
 	function handleSelectionMove(e: MouseEvent) {
@@ -238,13 +264,14 @@
 	}
 
 	function handleSelectionEnd() {
+		if (!isSelecting) return;
 		isSelecting = false;
-		document.removeEventListener('mousemove', handleSelectionMove);
-		document.removeEventListener('mouseup', handleSelectionEnd);
+		window.removeEventListener('mousemove', handleSelectionMove);
+		window.removeEventListener('mouseup', handleSelectionEnd);
 	}
 
 	function startPositionDrag(e: MouseEvent, controlId: string) {
-		if (!form?.model) return;
+		if (!form?.model || !formPreviewElement) return;
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -276,8 +303,8 @@
 			};
 		});
 
-		document.addEventListener('mousemove', handlePositionDragMove);
-		document.addEventListener('mouseup', handlePositionDragEnd);
+		window.addEventListener('mousemove', handlePositionDragMove);
+		window.addEventListener('mouseup', handlePositionDragEnd);
 	}
 
 	function handlePositionDragMove(e: MouseEvent) {
@@ -303,8 +330,8 @@
 						...control,
 						position: {
 							...control.position,
-							x: initialPos.x + deltaX,
-							y: initialPos.y + deltaY
+							x: Math.max(0, initialPos.x + deltaX),
+							y: Math.max(0, initialPos.y + deltaY)
 						}
 					}];
 				})
@@ -323,8 +350,8 @@
 		});
 
 		isDraggingPosition = false;
-		document.removeEventListener('mousemove', handlePositionDragMove);
-		document.removeEventListener('mouseup', handlePositionDragEnd);
+		window.removeEventListener('mousemove', handlePositionDragMove);
+		window.removeEventListener('mouseup', handlePositionDragEnd);
 	}
 
 	function handleControlClick(e: MouseEvent, controlId: string) {
@@ -374,7 +401,7 @@
 	}
 
 	function startResize(e: MouseEvent, controlId: string, direction: string) {
-		if (!form?.model[controlId]) return;
+		if (!form?.model[controlId] || !formPreviewElement) return;
 		e.preventDefault();
 		e.stopPropagation();
 		
@@ -396,8 +423,8 @@
 			y: control.position?.y || 0
 		};
 
-		document.addEventListener('mousemove', handleResizeMove);
-		document.addEventListener('mouseup', handleResizeEnd);
+		window.addEventListener('mousemove', handleResizeMove);
+		window.addEventListener('mouseup', handleResizeEnd);
 	}
 
 	function handleResizeMove(e: MouseEvent) {
@@ -448,8 +475,8 @@
 	function handleResizeEnd() {
 		isResizing = false;
 		resizeDirection = null;
-		document.removeEventListener('mousemove', handleResizeMove);
-		document.removeEventListener('mouseup', handleResizeEnd);
+		window.removeEventListener('mousemove', handleResizeMove);
+		window.removeEventListener('mouseup', handleResizeEnd);
 	}
 
 	function handleControlKeyDown(e: KeyboardEvent, controlId: string) {
@@ -462,6 +489,20 @@
 </script>
 
 <div class="form-builder">
+	<div class="form-header">
+		<input 
+			type="text" 
+			class="form-title-input"
+			placeholder="폼 제목을 입력하세요"
+			bind:value={form.title}
+		/>
+		<textarea 
+			class="form-description-input"
+			placeholder="폼 설명을 입력하세요"
+			bind:value={form.description}
+		></textarea>
+	</div>
+
 	<div class="controls-panel">
 		<h2 class="panel-title">컨트롤 목록</h2>
 		<div class="control-list">
@@ -528,11 +569,15 @@
 					class="control-wrapper"
 					class:selected={selectedControlIds.includes(controlId)}
 					style="
-						left: {typedControl.position?.x || 0}px;
-						top: {typedControl.position?.y || 0}px;
+						transform: translate({typedControl.position?.x || 0}px, {typedControl.position?.y || 0}px);
 						z-index: {typedControl.position?.zIndex || 1};
 						width: {typedControl.style?.width || '200px'};
 						height: {typedControl.style?.height || '40px'};
+						margin: {typedControl.style?.margin || '0'};
+						padding: {typedControl.style?.padding || '0'};
+						border: {typedControl.style?.border || '1px solid #e5e7eb'};
+						border-radius: {typedControl.style?.borderRadius || '0.375rem'};
+						background-color: {typedControl.style?.backgroundColor || 'white'};
 					"
 					draggable="true"
 					onmousedown={(e) => startPositionDrag(e, controlId)}
@@ -540,6 +585,8 @@
 					ondragend={handleControlDragEnd}
 					onclick={(e) => handleControlClick(e, controlId)}
 					onkeydown={(e) => handleControlKeyDown(e, controlId)}
+					role="button"
+					tabindex="0"
 				>
 					{#if editingControlId === controlId}
 						<div class="resize-handle n" onmousedown={(e) => startResize(e, controlId, 'n')} />
@@ -551,15 +598,7 @@
 						<div class="resize-handle sw" onmousedown={(e) => startResize(e, controlId, 'sw')} />
 						<div class="resize-handle nw" onmousedown={(e) => startResize(e, controlId, 'nw')} />
 					{/if}
-					<div class="control-content" style="
-						margin: {typedControl.style?.margin || '0'};
-						padding: {typedControl.style?.padding || '0.5rem'};
-						border: {typedControl.style?.border || '1px solid #e5e7eb'};
-						border-radius: {typedControl.style?.borderRadius || '0.375rem'};
-						background-color: {typedControl.style?.backgroundColor || 'white'};
-						height: 100%;
-						box-sizing: border-box;
-					">
+					<div class="control-content">
 						<div class="control-header">
 							<label class="control-label" style="
 								font-size: {typedControl.style?.fontSize || '0.875rem'};
@@ -593,6 +632,7 @@
 										border: {typedControl.style?.border || '1px solid #d1d5db'};
 										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
 										padding: {typedControl.style?.padding || '0.5rem'};
+										margin: {typedControl.style?.margin || '0'};
 										box-sizing: border-box;
 									"
 									disabled
@@ -615,6 +655,7 @@
 										border: {typedControl.style?.border || '1px solid #d1d5db'};
 										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
 										padding: {typedControl.style?.padding || '0.5rem'};
+										margin: {typedControl.style?.margin || '0'};
 										box-sizing: border-box;
 									"
 									disabled
@@ -633,6 +674,7 @@
 										border: {typedControl.style?.border || '1px solid #d1d5db'};
 										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
 										padding: {typedControl.style?.padding || '0.5rem'};
+										margin: {typedControl.style?.margin || '0'};
 										box-sizing: border-box;
 										resize: none;
 									"
@@ -651,6 +693,7 @@
 										border: {typedControl.style?.border || '1px solid #d1d5db'};
 										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
 										padding: {typedControl.style?.padding || '0.5rem'};
+										margin: {typedControl.style?.margin || '0'};
 										box-sizing: border-box;
 										cursor: not-allowed;
 									"
@@ -662,30 +705,33 @@
 									{/each}
 								</select>
 							{:else if typedControl.type === 'checkbox'}
-								<label 
-									class="form-checkbox"
+								<div 
+									class="form-checkbox-group"
 									style="
 										display: flex;
-										align-items: center;
+										flex-direction: column;
 										gap: 0.5rem;
 										font-size: {typedControl.style?.fontSize || '0.875rem'};
 										font-weight: {typedControl.style?.fontWeight || 'normal'};
 										color: {typedControl.style?.color || '#4b5563'};
-										cursor: not-allowed;
+										padding: {typedControl.style?.padding || '0.5rem'};
+										margin: {typedControl.style?.margin || '0'};
+										height: 100%;
+										box-sizing: border-box;
 									"
 								>
-									<input 
-										type="checkbox"
-										style="
-											width: 1rem;
-											height: 1rem;
-											accent-color: {typedControl.style?.accentColor || '#2563eb'};
-											cursor: not-allowed;
-										"
-										disabled 
-									/>
-									<span class="checkbox-label">{typedControl.label}</span>
-								</label>
+									<label class="form-checkbox">
+										<input 
+											type="checkbox"
+											style="
+												accent-color: {typedControl.style?.accentColor || '#2563eb'};
+												cursor: not-allowed;
+											"
+											disabled 
+										/>
+										<span>{typedControl.label}</span>
+									</label>
+								</div>
 							{:else if typedControl.type === 'radio'}
 								<div 
 									class="form-radio-group"
@@ -696,27 +742,24 @@
 										font-size: {typedControl.style?.fontSize || '0.875rem'};
 										font-weight: {typedControl.style?.fontWeight || 'normal'};
 										color: {typedControl.style?.color || '#4b5563'};
+										padding: {typedControl.style?.padding || '0.5rem'};
+										margin: {typedControl.style?.margin || '0'};
+										height: 100%;
+										box-sizing: border-box;
 									"
 								>
 									{#each typedControl.options || [] as option}
-										<label class="form-radio" style="
-											display: flex;
-											align-items: center;
-											gap: 0.5rem;
-											cursor: not-allowed;
-										">
+										<label class="form-radio">
 											<input 
 												type="radio"
 												name={controlId}
 												style="
-													width: 1rem;
-													height: 1rem;
 													accent-color: {typedControl.style?.accentColor || '#2563eb'};
 													cursor: not-allowed;
 												"
 												disabled 
 											/>
-											<span class="radio-label">{option.label}</span>
+											<span>{option.label}</span>
 										</label>
 									{/each}
 								</div>
@@ -743,11 +786,63 @@
 
 <style>
 	.form-builder {
-		display: flex;
+		display: grid;
+		grid-template-rows: auto 1fr;
+		grid-template-columns: 200px 1fr 300px;
 		gap: 1rem;
 		height: 100vh;
 		padding: 1rem;
 		background: #f9fafb;
+		max-width: 100%;
+		margin: 0;
+		box-sizing: border-box;
+	}
+
+	.form-header {
+		grid-column: 1 / -1;
+		padding: 1rem;
+		background: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.form-title-input {
+		width: 100%;
+		padding: 0.75rem;
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #111827;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		margin-bottom: 0.75rem;
+		background: #f9fafb;
+		transition: all 0.2s ease;
+	}
+
+	.form-title-input:focus {
+		outline: none;
+		border-color: #2563eb;
+		box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+	}
+
+	.form-description-input {
+		width: 100%;
+		padding: 0.75rem;
+		font-size: 0.875rem;
+		color: #4b5563;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		background: #f9fafb;
+		resize: vertical;
+		min-height: 60px;
+		transition: all 0.2s ease;
+	}
+
+	.form-description-input:focus {
+		outline: none;
+		border-color: #2563eb;
+		box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
 	}
 
 	.controls-panel {
@@ -757,6 +852,7 @@
 		border-radius: 0.5rem;
 		padding: 1rem;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		box-sizing: border-box;
 	}
 
 	.panel-title {
@@ -810,13 +906,14 @@
 	}
 
 	.form-preview {
-		flex: 1;
 		position: relative;
 		border: 1px solid #e5e7eb;
 		border-radius: 0.5rem;
 		overflow: hidden;
 		background: white;
 		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		min-width: 0;
+		box-sizing: border-box;
 	}
 
 	.form-preview-inner {
@@ -824,14 +921,17 @@
 		width: 100%;
 		height: 100%;
 		min-height: 500px;
-		padding: 1rem;
 	}
 
 	.properties-panel {
 		width: 300px;
 		border-left: 1px solid #e5e7eb;
-		padding-left: 1rem;
+		padding: 1rem;
 		overflow-y: auto;
+		background: white;
+		border-radius: 0.5rem;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+		box-sizing: border-box;
 	}
 
 	.control-wrapper {
@@ -841,6 +941,9 @@
 		min-width: 100px;
 		box-sizing: border-box;
 		transition: box-shadow 0.2s ease;
+		display: flex;
+		flex-direction: column;
+		transform: translate(0, 0);
 	}
 
 	.control-wrapper.selected {
@@ -850,11 +953,10 @@
 	}
 
 	.control-content {
-		height: 100%;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
 		background: white;
-		border: 1px solid #e5e7eb;
-		border-radius: 0.375rem;
-		overflow: hidden;
 		box-sizing: border-box;
 	}
 
@@ -862,7 +964,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.5rem;
+		padding: 0.25rem 0.5rem;
 		background: #f9fafb;
 		border-bottom: 1px solid #e5e7eb;
 	}
@@ -895,8 +997,10 @@
 	}
 
 	.control-field {
-		height: calc(100% - 40px);
-		padding: 0.5rem;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 0.25rem;
 		box-sizing: border-box;
 	}
 
@@ -927,6 +1031,7 @@
 		cursor: not-allowed;
 	}
 
+	.form-checkbox-group,
 	.form-radio-group {
 		display: flex;
 		flex-direction: column;

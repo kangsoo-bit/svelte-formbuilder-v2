@@ -6,17 +6,44 @@
     "text_1744618387002": {
       "id": "text_1744618387002",
       "type": "text",
-      "label": "새 text"
+      "label": "비고3",
+      "position": {
+        "x": 65,
+        "y": 640,
+        "zIndex": 1
+      },
+      "style": {
+        "width": "503px",
+        "height": "229px"
+      }
     },
     "text_1744618388350": {
       "id": "text_1744618388350",
       "type": "text",
-      "label": "새 text"
+      "label": "비고2",
+      "position": {
+        "x": 65,
+        "y": 403,
+        "zIndex": 1
+      },
+      "style": {
+        "width": "500px",
+        "height": "206px"
+      }
     },
     "text_1744618390013": {
       "id": "text_1744618390013",
       "type": "text",
-      "label": "새 text"
+      "label": "비고1",
+      "position": {
+        "x": 57,
+        "y": 176,
+        "zIndex": 1
+      },
+      "style": {
+        "width": "509px",
+        "height": "189px"
+      }
     }
   },
   "createdAt": "2025-04-14T08:13:12.107Z",

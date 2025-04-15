@@ -6,11 +6,11 @@
     "text_1744618178913": {
       "id": "text_1744618178913",
       "type": "text",
-      "label": "새 text",
+      "label": "제목2",
       "position": {
-        "zIndex": 4,
         "x": 70,
-        "y": 212
+        "y": 212,
+        "zIndex": 4
       },
       "style": {
         "width": "200px",
@@ -23,7 +23,7 @@
       "label": "성별체크",
       "position": {
         "zIndex": 5,
-        "x": 282,
+        "x": 281,
         "y": 214
       },
       "style": {
@@ -46,8 +46,8 @@
         }
       ],
       "position": {
-        "x": 62,
-        "y": 550,
+        "x": 68,
+        "y": 438,
         "zIndex": 1
       },
       "style": {
@@ -71,8 +71,8 @@
       ],
       "position": {
         "zIndex": 3,
-        "x": 64,
-        "y": 437
+        "x": 70,
+        "y": 325
       },
       "style": {
         "width": "306px",
@@ -81,20 +81,20 @@
     },
     "text_1744619189741": {
       "type": "text",
-      "label": "새 text",
+      "label": "비고란2-----",
       "position": {
-        "zIndex": 6,
-        "x": 68,
-        "y": 320
+        "x": 76,
+        "y": 736,
+        "zIndex": 6
       },
       "style": {
         "width": "509px",
-        "height": "98px"
+        "height": "72px"
       }
     },
     "select_1744619363652": {
       "type": "select",
-      "label": "선택",
+      "label": "집주소",
       "options": [
         {
           "value": "선택1",
@@ -106,9 +106,9 @@
         }
       ],
       "position": {
-        "zIndex": 5,
-        "x": 386,
-        "y": 444
+        "x": 392,
+        "y": 332,
+        "zIndex": 5
       },
       "style": {
         "width": "200px",
@@ -118,7 +118,7 @@
     "text_1744675109477": {
       "id": "text_1744675109477",
       "type": "text",
-      "label": "새 text",
+      "label": "제목1",
       "position": {
         "x": 64,
         "y": 91,
@@ -132,18 +132,19 @@
     "textarea_1744675118730": {
       "id": "textarea_1744675118730",
       "type": "textarea",
-      "label": "새 textarea",
+      "label": "비고1",
       "position": {
-        "x": 64,
-        "y": 696,
+        "x": 70,
+        "y": 584,
         "zIndex": 2
       },
       "style": {
         "width": "498px",
-        "height": "188px"
+        "height": "98px"
       }
     }
   },
   "createdAt": "2025-04-14T08:09:56.360Z",
-  "updatedAt": "2025-04-14T08:09:56.360Z"
+  "updatedAt": "2025-04-14T08:09:56.360Z",
+  "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe"
 }

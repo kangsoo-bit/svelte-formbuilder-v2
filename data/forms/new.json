@@ -1,0 +1,24 @@
+{
+  "id": "new",
+  "title": "새 폼2",
+  "description": "새폼2",
+  "model": {
+    "text_1744679904159": {
+      "id": "text_1744679904159",
+      "widgetId": "ea105ee9-fa0c-4250-8db2-4e3c494944c7",
+      "type": "text",
+      "label": "새 text",
+      "position": {
+        "x": 39,
+        "y": 36,
+        "zIndex": 1
+      },
+      "style": {
+        "width": "615px",
+        "height": "244px"
+      }
+    }
+  },
+  "initialData": {},
+  "widgetId": "ea105ee9-fa0c-4250-8db2-4e3c494944c7"
+}
