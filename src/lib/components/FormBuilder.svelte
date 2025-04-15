@@ -462,6 +462,36 @@
 </script>
 
 <div class="form-builder">
+	<div class="controls-panel">
+		<h2 class="panel-title">컨트롤 목록</h2>
+		<div class="control-list">
+			{#each controlTypes as { type, label }}
+				<div
+					class="control-item"
+					draggable="true"
+					ondragstart={(e) => handleDragStart(e, type)}
+				>
+					<span class="control-icon">
+						{#if type === 'text'}
+							<span>Aa</span>
+						{:else if type === 'number'}
+							<span>123</span>
+						{:else if type === 'select'}
+							<span>▼</span>
+						{:else if type === 'checkbox'}
+							<span>☐</span>
+						{:else if type === 'radio'}
+							<span>◉</span>
+						{:else if type === 'textarea'}
+							<span>📝</span>
+						{/if}
+					</span>
+					<span class="control-label">{label}</span>
+				</div>
+			{/each}
+		</div>
+	</div>
+
 	<div class="form-preview" 
 		ondragover={handleDragOver}
 		ondragleave={handleDragLeave}
@@ -718,6 +748,65 @@
 		height: 100vh;
 		padding: 1rem;
 		background: #f9fafb;
+	}
+
+	.controls-panel {
+		width: 200px;
+		background: white;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.5rem;
+		padding: 1rem;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	}
+
+	.panel-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: #374151;
+		margin: 0 0 1rem 0;
+	}
+
+	.control-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.control-item {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.75rem;
+		background: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 0.375rem;
+		cursor: move;
+		user-select: none;
+		transition: all 0.2s ease;
+	}
+
+	.control-item:hover {
+		background: #f3f4f6;
+		border-color: #d1d5db;
+		transform: translateY(-1px);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+	}
+
+	.control-icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		background: #e5e7eb;
+		border-radius: 0.25rem;
+		font-size: 0.875rem;
+		color: #4b5563;
+	}
+
+	.control-label {
+		font-size: 0.875rem;
+		color: #4b5563;
 	}
 
 	.form-preview {

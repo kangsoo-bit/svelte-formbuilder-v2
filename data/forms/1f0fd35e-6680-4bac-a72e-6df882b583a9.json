@@ -9,8 +9,12 @@
       "label": "새 text",
       "position": {
         "zIndex": 4,
-        "x": 61,
-        "y": 66
+        "x": 70,
+        "y": 212
+      },
+      "style": {
+        "width": "200px",
+        "height": "97px"
       }
     },
     "checkbox_1744618180268": {
@@ -19,11 +23,11 @@
       "label": "성별체크",
       "position": {
         "zIndex": 5,
-        "x": 285,
-        "y": 74
+        "x": 282,
+        "y": 214
       },
       "style": {
-        "width": "279px",
+        "width": "287px",
         "height": "91px"
       }
     },
@@ -42,8 +46,8 @@
         }
       ],
       "position": {
-        "x": 53,
-        "y": 404,
+        "x": 62,
+        "y": 550,
         "zIndex": 1
       },
       "style": {
@@ -67,8 +71,8 @@
       ],
       "position": {
         "zIndex": 3,
-        "x": 55,
-        "y": 291
+        "x": 64,
+        "y": 437
       },
       "style": {
         "width": "306px",
@@ -80,8 +84,8 @@
       "label": "새 text",
       "position": {
         "zIndex": 6,
-        "x": 59,
-        "y": 174
+        "x": 68,
+        "y": 320
       },
       "style": {
         "width": "509px",
@@ -103,8 +107,40 @@
       ],
       "position": {
         "zIndex": 5,
-        "x": 377,
-        "y": 298
+        "x": 386,
+        "y": 444
+      },
+      "style": {
+        "width": "200px",
+        "height": "85px"
+      }
+    },
+    "text_1744675109477": {
+      "id": "text_1744675109477",
+      "type": "text",
+      "label": "새 text",
+      "position": {
+        "x": 64,
+        "y": 91,
+        "zIndex": 1
+      },
+      "style": {
+        "width": "502px",
+        "height": "98px"
+      }
+    },
+    "textarea_1744675118730": {
+      "id": "textarea_1744675118730",
+      "type": "textarea",
+      "label": "새 textarea",
+      "position": {
+        "x": 64,
+        "y": 696,
+        "zIndex": 2
+      },
+      "style": {
+        "width": "498px",
+        "height": "188px"
       }
     }
   },
