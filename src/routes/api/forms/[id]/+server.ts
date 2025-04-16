@@ -11,7 +11,7 @@ export const GET: RequestHandler = async ({ params }) => {
         const content = await readFile(filename, 'utf-8');
         return json(JSON.parse(content));
     } catch (error) {
-        if (error.code === 'ENOENT') {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
             return new Response('폼을 찾을 수 없습니다.', { status: 404 });
         }
         console.error('Error reading form:', error);
@@ -37,7 +37,7 @@ export const DELETE: RequestHandler = async ({ params }) => {
         await unlink(filename);
         return new Response(null, { status: 204 });
     } catch (error) {
-        if (error.code === 'ENOENT') {
+        if (error && typeof error === 'object' && 'code' in error && error.code === 'ENOENT') {
             return new Response('폼을 찾을 수 없습니다.', { status: 404 });
         }
         console.error('Error deleting form:', error);

@@ -3,13 +3,13 @@
     import type { FormModel, FormData, FormErrors, FormProps, FormField } from '$lib/types/form';
 
     let props = $props();
-    let formName = props.formName ?? '';
-    let data = props.data ?? {} as FormData;
-    let model = props.model ?? {} as FormModel;
-    let errors = props.errors ?? {} as FormErrors;
-    let hideControls = props.hideControls ?? [];
-    let readOnlyControls = props.readOnlyControls ?? [];
-    let readOnly = props.readOnly ?? false;
+    let formName = $state(props.formName ?? '');
+    let data = $state(props.data ?? {} as FormData);
+    let model = $state(props.model ?? {} as FormModel);
+    let errors = $state(props.errors ?? {} as FormErrors);
+    let hideControls = $state(props.hideControls ?? []);
+    let readOnlyControls = $state(props.readOnlyControls ?? []);
+    let readOnly = $state(props.readOnly ?? false);
 
     let uploadUrl = $state('/api/upload');
     let downloadUrl = $state('/api/download');

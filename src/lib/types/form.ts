@@ -86,4 +86,12 @@ export interface FormViewerProps {
         model: FormModel;
         initialData: FormData;
     }>;
+}
+
+export interface FormBuilderState {
+    editingControlId: string | null;
+    isResizing: boolean;
+    resizeDirection: string | null;
+    initialSize: { width: number; height: number };
+    initialPosition: { x: number; y: number };
 } 

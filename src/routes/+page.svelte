@@ -77,7 +77,7 @@
                         </a>
                         <button 
                             class="text-red-500 hover:underline"
-                            on:click={() => deleteForm(form.id)}
+                            onclick={() => deleteForm(form.id)}
                         >
                             삭제
                         </button>

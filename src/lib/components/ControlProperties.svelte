@@ -47,7 +47,9 @@
 
 	function updatePosition(property: 'x' | 'y' | 'zIndex', value: number) {
 		editingControl.position = {
-			...editingControl.position,
+			x: editingControl.position?.x || 0,
+			y: editingControl.position?.y || 0,
+			zIndex: editingControl.position?.zIndex || 1,
 			[property]: value
 		};
 		updateControl();
