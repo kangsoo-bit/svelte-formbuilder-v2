@@ -511,6 +511,8 @@
 					class="control-item"
 					draggable="true"
 					ondragstart={(e) => handleDragStart(e, type)}
+					role="button"
+					tabindex="0"
 				>
 					<span class="control-icon">
 						{#if type === 'text'}
@@ -550,6 +552,8 @@
 			}
 		}}
 		onmousedown={startSelection}
+		role="toolbar"
+		tabindex="0"
 	>
 		{#if isSelecting}
 			<div
@@ -560,7 +564,7 @@
 					width: {Math.abs(selectionEnd.x - selectionStart.x)}px;
 					height: {Math.abs(selectionEnd.y - selectionStart.y)}px;
 				"
-			/>
+			></div>
 		{/if}
 		<div class="form-preview-inner" bind:this={formPreviewElement}>
 			{#each Object.entries(form.model) as [controlId, control]}
@@ -589,22 +593,22 @@
 					tabindex="0"
 				>
 					{#if editingControlId === controlId}
-						<div class="resize-handle n" onmousedown={(e) => startResize(e, controlId, 'n')} />
-						<div class="resize-handle e" onmousedown={(e) => startResize(e, controlId, 'e')} />
-						<div class="resize-handle s" onmousedown={(e) => startResize(e, controlId, 's')} />
-						<div class="resize-handle w" onmousedown={(e) => startResize(e, controlId, 'w')} />
-						<div class="resize-handle ne" onmousedown={(e) => startResize(e, controlId, 'ne')} />
-						<div class="resize-handle se" onmousedown={(e) => startResize(e, controlId, 'se')} />
-						<div class="resize-handle sw" onmousedown={(e) => startResize(e, controlId, 'sw')} />
-						<div class="resize-handle nw" onmousedown={(e) => startResize(e, controlId, 'nw')} />
+						<div class="resize-handle n" onmousedown={(e) => startResize(e, controlId, 'n')} role="button" aria-label="위쪽 크기 조절" tabindex="0"></div>
+						<div class="resize-handle e" onmousedown={(e) => startResize(e, controlId, 'e')} role="button" aria-label="오른쪽 크기 조절" tabindex="0"></div>
+						<div class="resize-handle s" onmousedown={(e) => startResize(e, controlId, 's')} role="button" aria-label="아래쪽 크기 조절" tabindex="0"></div>
+						<div class="resize-handle w" onmousedown={(e) => startResize(e, controlId, 'w')} role="button" aria-label="왼쪽 크기 조절" tabindex="0"></div>
+						<div class="resize-handle ne" onmousedown={(e) => startResize(e, controlId, 'ne')} role="button" aria-label="오른쪽 위 크기 조절" tabindex="0"></div>
+						<div class="resize-handle se" onmousedown={(e) => startResize(e, controlId, 'se')} role="button" aria-label="오른쪽 아래 크기 조절" tabindex="0"></div>
+						<div class="resize-handle sw" onmousedown={(e) => startResize(e, controlId, 'sw')} role="button" aria-label="왼쪽 아래 크기 조절" tabindex="0"></div>
+						<div class="resize-handle nw" onmousedown={(e) => startResize(e, controlId, 'nw')} role="button" aria-label="왼쪽 위 크기 조절" tabindex="0"></div>
 					{/if}
 					<div class="control-content">
 						<div class="control-header">
-							<label class="control-label" style="
+							<span class="control-title" style="
 								font-size: {typedControl.style?.fontSize || '0.875rem'};
 								font-weight: {typedControl.style?.fontWeight || '500'};
 								color: {typedControl.style?.color || '#374151'};
-							">{typedControl.label}</label>
+							">{typedControl.label}</span>
 							<button
 								class="delete-button"
 								onclick={(e) => {
@@ -618,151 +622,169 @@
 
 						<div class="control-field">
 							{#if typedControl.type === 'text'}
-								<input
-									type="text"
-									class="form-input"
-									placeholder={typedControl.placeholder || typedControl.label}
-									style="
-										width: 100%;
-										height: 100%;
-										font-size: {typedControl.style?.fontSize || '0.875rem'};
-										font-weight: {typedControl.style?.fontWeight || 'normal'};
-										color: {typedControl.style?.color || '#4b5563'};
-										background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
-										border: {typedControl.style?.border || '1px solid #d1d5db'};
-										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
-										padding: {typedControl.style?.padding || '0.5rem'};
-										margin: {typedControl.style?.margin || '0'};
-										box-sizing: border-box;
-									"
-									disabled
-								/>
+								<label class="control-label">
+									{typedControl.label}
+									<input
+										type="text"
+										class="form-input"
+										placeholder={typedControl.placeholder || typedControl.label}
+										style="
+											width: 100%;
+											height: 100%;
+											font-size: {typedControl.style?.fontSize || '0.875rem'};
+											font-weight: {typedControl.style?.fontWeight || 'normal'};
+											color: {typedControl.style?.color || '#4b5563'};
+											background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
+											border: {typedControl.style?.border || '1px solid #d1d5db'};
+											border-radius: {typedControl.style?.borderRadius || '0.375rem'};
+											padding: {typedControl.style?.padding || '0.5rem'};
+											margin: {typedControl.style?.margin || '0'};
+											box-sizing: border-box;
+										"
+										disabled
+									/>
+								</label>
 							{:else if typedControl.type === 'number'}
-								<input
-									type="number"
-									class="form-input"
-									placeholder={typedControl.placeholder || typedControl.label}
-									min={typedControl.min}
-									max={typedControl.max}
-									step={typedControl.step}
-									style="
-										width: 100%;
-										height: 100%;
-										font-size: {typedControl.style?.fontSize || '0.875rem'};
-										font-weight: {typedControl.style?.fontWeight || 'normal'};
-										color: {typedControl.style?.color || '#4b5563'};
-										background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
-										border: {typedControl.style?.border || '1px solid #d1d5db'};
-										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
-										padding: {typedControl.style?.padding || '0.5rem'};
-										margin: {typedControl.style?.margin || '0'};
-										box-sizing: border-box;
-									"
-									disabled
-								/>
+								<label class="control-label">
+									{typedControl.label}
+									<input
+										type="number"
+										class="form-input"
+										placeholder={typedControl.placeholder || typedControl.label}
+										min={typedControl.min}
+										max={typedControl.max}
+										step={typedControl.step}
+										style="
+											width: 100%;
+											height: 100%;
+											font-size: {typedControl.style?.fontSize || '0.875rem'};
+											font-weight: {typedControl.style?.fontWeight || 'normal'};
+											color: {typedControl.style?.color || '#4b5563'};
+											background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
+											border: {typedControl.style?.border || '1px solid #d1d5db'};
+											border-radius: {typedControl.style?.borderRadius || '0.375rem'};
+											padding: {typedControl.style?.padding || '0.5rem'};
+											margin: {typedControl.style?.margin || '0'};
+											box-sizing: border-box;
+										"
+										disabled
+									/>
+								</label>
 							{:else if typedControl.type === 'textarea'}
-								<textarea
-									class="form-textarea"
-									placeholder={typedControl.placeholder || typedControl.label}
-									style="
-										width: 100%;
-										height: 100%;
-										font-size: {typedControl.style?.fontSize || '0.875rem'};
-										font-weight: {typedControl.style?.fontWeight || 'normal'};
-										color: {typedControl.style?.color || '#4b5563'};
-										background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
-										border: {typedControl.style?.border || '1px solid #d1d5db'};
-										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
-										padding: {typedControl.style?.padding || '0.5rem'};
-										margin: {typedControl.style?.margin || '0'};
-										box-sizing: border-box;
-										resize: none;
-									"
-									disabled
-								></textarea>
+								<label class="control-label">
+									{typedControl.label}
+									<textarea
+										class="form-textarea"
+										placeholder={typedControl.placeholder || typedControl.label}
+										style="
+											width: 100%;
+											height: 100%;
+											font-size: {typedControl.style?.fontSize || '0.875rem'};
+											font-weight: {typedControl.style?.fontWeight || 'normal'};
+											color: {typedControl.style?.color || '#4b5563'};
+											background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
+											border: {typedControl.style?.border || '1px solid #d1d5db'};
+											border-radius: {typedControl.style?.borderRadius || '0.375rem'};
+											padding: {typedControl.style?.padding || '0.5rem'};
+											margin: {typedControl.style?.margin || '0'};
+											box-sizing: border-box;
+											resize: none;
+										"
+										disabled
+									></textarea>
+								</label>
 							{:else if typedControl.type === 'select'}
-								<select 
-									class="form-select"
-									style="
-										width: 100%;
-										height: 100%;
-										font-size: {typedControl.style?.fontSize || '0.875rem'};
-										font-weight: {typedControl.style?.fontWeight || 'normal'};
-										color: {typedControl.style?.color || '#4b5563'};
-										background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
-										border: {typedControl.style?.border || '1px solid #d1d5db'};
-										border-radius: {typedControl.style?.borderRadius || '0.375rem'};
-										padding: {typedControl.style?.padding || '0.5rem'};
-										margin: {typedControl.style?.margin || '0'};
-										box-sizing: border-box;
-										cursor: not-allowed;
-									"
-									disabled
-								>
-									<option value="">{typedControl.placeholder || '선택하세요'}</option>
-									{#each typedControl.options || [] as option}
-										<option value={option.value}>{option.label}</option>
-									{/each}
-								</select>
+								<label class="control-label">
+									{typedControl.label}
+									<select 
+										class="form-select"
+										style="
+											width: 100%;
+											height: 100%;
+											font-size: {typedControl.style?.fontSize || '0.875rem'};
+											font-weight: {typedControl.style?.fontWeight || 'normal'};
+											color: {typedControl.style?.color || '#4b5563'};
+											background-color: {typedControl.style?.backgroundColor || '#f9fafb'};
+											border: {typedControl.style?.border || '1px solid #d1d5db'};
+											border-radius: {typedControl.style?.borderRadius || '0.375rem'};
+											padding: {typedControl.style?.padding || '0.5rem'};
+											margin: {typedControl.style?.margin || '0'};
+											box-sizing: border-box;
+											cursor: not-allowed;
+										"
+										disabled
+									>
+										<option value="">{typedControl.placeholder || '선택하세요'}</option>
+										{#each typedControl.options || [] as option}
+											<option value={option.value}>{option.label}</option>
+										{/each}
+									</select>
+								</label>
 							{:else if typedControl.type === 'checkbox'}
-								<div 
-									class="form-checkbox-group"
-									style="
-										display: flex;
-										flex-direction: column;
-										gap: 0.5rem;
-										font-size: {typedControl.style?.fontSize || '0.875rem'};
-										font-weight: {typedControl.style?.fontWeight || 'normal'};
-										color: {typedControl.style?.color || '#4b5563'};
-										padding: {typedControl.style?.padding || '0.5rem'};
-										margin: {typedControl.style?.margin || '0'};
-										height: 100%;
-										box-sizing: border-box;
-									"
-								>
-									<label class="form-checkbox">
-										<input 
-											type="checkbox"
-											style="
-												accent-color: {typedControl.style?.accentColor || '#2563eb'};
-												cursor: not-allowed;
-											"
-											disabled 
-										/>
-										<span>{typedControl.label}</span>
-									</label>
-								</div>
-							{:else if typedControl.type === 'radio'}
-								<div 
-									class="form-radio-group"
-									style="
-										display: flex;
-										flex-direction: column;
-										gap: 0.5rem;
-										font-size: {typedControl.style?.fontSize || '0.875rem'};
-										font-weight: {typedControl.style?.fontWeight || 'normal'};
-										color: {typedControl.style?.color || '#4b5563'};
-										padding: {typedControl.style?.padding || '0.5rem'};
-										margin: {typedControl.style?.margin || '0'};
-										height: 100%;
-										box-sizing: border-box;
-									"
-								>
-									{#each typedControl.options || [] as option}
-										<label class="form-radio">
+								<label class="control-label">
+									{typedControl.label}
+									<div 
+										class="form-checkbox-group"
+										style="
+											display: flex;
+											flex-direction: column;
+											gap: 0.5rem;
+											font-size: {typedControl.style?.fontSize || '0.875rem'};
+											font-weight: {typedControl.style?.fontWeight || 'normal'};
+											color: {typedControl.style?.color || '#4b5563'};
+											padding: {typedControl.style?.padding || '0.5rem'};
+											margin: {typedControl.style?.margin || '0'};
+											height: 100%;
+											box-sizing: border-box;
+										"
+									>
+										<label class="form-checkbox">
 											<input 
-												type="radio"
-												name={controlId}
+												type="checkbox"
 												style="
 													accent-color: {typedControl.style?.accentColor || '#2563eb'};
 													cursor: not-allowed;
 												"
 												disabled 
 											/>
-											<span>{option.label}</span>
+											<span>{typedControl.label}</span>
 										</label>
-									{/each}
-								</div>
+									</div>
+								</label>
+							{:else if typedControl.type === 'radio'}
+								<label class="control-label">
+									{typedControl.label}
+									<div 
+										class="form-radio-group"
+										style="
+											display: flex;
+											flex-direction: column;
+											gap: 0.5rem;
+											font-size: {typedControl.style?.fontSize || '0.875rem'};
+											font-weight: {typedControl.style?.fontWeight || 'normal'};
+											color: {typedControl.style?.color || '#4b5563'};
+											padding: {typedControl.style?.padding || '0.5rem'};
+											margin: {typedControl.style?.margin || '0'};
+											height: 100%;
+											box-sizing: border-box;
+										"
+									>
+										{#each typedControl.options || [] as option}
+											<label class="form-radio">
+												<input 
+													type="radio"
+													name={controlId}
+													style="
+														accent-color: {typedControl.style?.accentColor || '#2563eb'};
+														cursor: not-allowed;
+													"
+													disabled 
+												/>
+												<span>{option.label}</span>
+											</label>
+										{/each}
+									</div>
+								</label>
 							{/if}
 						</div>
 					</div>
@@ -969,7 +991,7 @@
 		border-bottom: 1px solid #e5e7eb;
 	}
 
-	.control-label {
+	.control-title {
 		font-size: 0.875rem;
 		font-weight: 500;
 		color: #374151;

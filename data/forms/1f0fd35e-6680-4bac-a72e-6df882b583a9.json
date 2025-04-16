@@ -83,13 +83,13 @@
       "type": "text",
       "label": "비고란2-----",
       "position": {
-        "x": 106,
-        "y": 699,
+        "x": 104,
+        "y": 768,
         "zIndex": 6
       },
       "style": {
         "width": "509px",
-        "height": "72px"
+        "height": "182px"
       }
     },
     "select_1744619363652": {
@@ -118,7 +118,7 @@
     "text_1744675109477": {
       "id": "text_1744675109477",
       "type": "text",
-      "label": "1. 제목",
+      "label": "1. 제목123",
       "position": {
         "x": 94,
         "y": 54,

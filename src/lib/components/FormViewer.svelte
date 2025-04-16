@@ -6,7 +6,8 @@
     let formData = $state<Record<string, any>>({});
     let errors = $state<Record<string, string>>({});
 
-    function handleSubmit() {
+    function handleSubmit(e: SubmitEvent) {
+        e.preventDefault();
         // 폼 데이터 검증 및 제출 로직
         console.log('Form data:', formData);
     }
@@ -24,7 +25,7 @@
         {/if}
     </div>
 
-    <form on:submit|preventDefault={handleSubmit} class="space-y-6">
+    <form onsubmit={handleSubmit} class="space-y-6">
         {#each Object.entries(form.model) as [fieldId, field]}
             {@const typedField = field as FormField}
             <div class="form-field"
@@ -47,21 +48,21 @@
                         id={fieldId}
                         class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         value={formData[fieldId] || ''}
-                        on:input={(e) => handleChange(fieldId, e.currentTarget.value)}
+                        oninput={(e) => handleChange(fieldId, e.currentTarget.value)}
                     />
                 {:else if typedField.type === 'textarea'}
                     <textarea
                         id={fieldId}
                         class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         value={formData[fieldId] || ''}
-                        on:input={(e) => handleChange(fieldId, e.currentTarget.value)}
+                        oninput={(e) => handleChange(fieldId, e.currentTarget.value)}
                     ></textarea>
                 {:else if typedField.type === 'select'}
                     <select
                         id={fieldId}
                         class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         value={formData[fieldId] || ''}
-                        on:change={(e) => handleChange(fieldId, e.currentTarget.value)}
+                        onchange={(e) => handleChange(fieldId, e.currentTarget.value)}
                     >
                         <option value="">선택하세요</option>
                         {#each typedField.options || [] as option}
@@ -75,7 +76,7 @@
                             id={fieldId}
                             class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             checked={formData[fieldId] || false}
-                            on:change={(e) => handleChange(fieldId, e.currentTarget.checked)}
+                            onchange={(e) => handleChange(fieldId, e.currentTarget.checked)}
                         />
                         <span class="ml-2">{typedField.label}</span>
                     </label>
@@ -89,7 +90,7 @@
                                     class="border-gray-300 text-blue-600 focus:ring-blue-500"
                                     value={option.value}
                                     checked={formData[fieldId] === option.value}
-                                    on:change={(e) => handleChange(fieldId, e.currentTarget.value)}
+                                    onchange={(e) => handleChange(fieldId, e.currentTarget.value)}
                                 />
                                 <span class="ml-2">{option.label}</span>
                             </label>
