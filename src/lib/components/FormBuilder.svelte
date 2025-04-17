@@ -527,7 +527,7 @@
 	}
 </script>
 
-<div class="form-builder" onkeydown={handleKeyDown} tabindex="0">
+<div class="form-builder" onkeydown={handleKeyDown} role="application" aria-label="폼 빌더 영역" tabindex="0">
 	<div class="form-header">
 		<input 
 			type="text" 
