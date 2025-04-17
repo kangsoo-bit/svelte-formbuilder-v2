@@ -3,144 +3,189 @@
   "title": "통원확인서",
   "description": "통원을 확인하는 문서",
   "model": {
-    "text_1744618178913": {
-      "id": "text_1744618178913",
+    "text_1744850668612": {
+      "id": "text_1744850668612",
+      "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe",
       "type": "text",
-      "label": "2. 부제목",
+      "label": "서식제목",
       "position": {
-        "x": 100,
-        "y": 175,
-        "zIndex": 4
-      },
-      "style": {
-        "width": "200px",
-        "height": "97px"
-      }
-    },
-    "checkbox_1744618180268": {
-      "id": "checkbox_1744618180268",
-      "type": "checkbox",
-      "label": "성별체크",
-      "position": {
-        "zIndex": 5,
-        "x": 311,
-        "y": 177
-      },
-      "style": {
-        "width": "287px",
-        "height": "91px"
-      }
-    },
-    "radio_1744618181722": {
-      "id": "radio_1744618181722",
-      "type": "radio",
-      "label": "성별옵션",
-      "options": [
-        {
-          "value": "남",
-          "label": "M"
-        },
-        {
-          "value": "여",
-          "label": "F"
-        }
-      ],
-      "position": {
-        "x": 98,
-        "y": 401,
+        "x": 32.5,
+        "y": 19,
         "zIndex": 1
       },
       "style": {
-        "width": "502px",
-        "height": "123px"
+        "width": "856px",
+        "height": "168px"
       }
     },
-    "select_1744618183196": {
-      "id": "select_1744618183196",
-      "type": "select",
-      "label": "성별",
-      "options": [
-        {
-          "value": "남",
-          "label": "M"
-        },
-        {
-          "value": "여",
-          "label": "F"
-        }
-      ],
-      "position": {
-        "zIndex": 3,
-        "x": 100,
-        "y": 288
-      },
-      "style": {
-        "width": "306px",
-        "height": "101px"
-      }
-    },
-    "text_1744619189741": {
-      "type": "text",
-      "label": "비고란2-----",
-      "position": {
-        "x": 104,
-        "y": 768,
-        "zIndex": 6
-      },
-      "style": {
-        "width": "509px",
-        "height": "182px"
-      }
-    },
-    "select_1744619363652": {
-      "type": "select",
-      "label": "집주소",
-      "options": [
-        {
-          "value": "선택1",
-          "label": "1"
-        },
-        {
-          "value": "선택2",
-          "label": "2"
-        }
-      ],
-      "position": {
-        "x": 422,
-        "y": 295,
-        "zIndex": 5
-      },
-      "style": {
-        "width": "200px",
-        "height": "85px"
-      }
-    },
-    "text_1744675109477": {
-      "id": "text_1744675109477",
-      "type": "text",
-      "label": "1. 제목123",
-      "position": {
-        "x": 94,
-        "y": 54,
-        "zIndex": 1
-      },
-      "style": {
-        "width": "502px",
-        "height": "98px"
-      }
-    },
-    "textarea_1744675118730": {
-      "id": "textarea_1744675118730",
+    "textarea_1744850691142": {
+      "id": "textarea_1744850691142",
+      "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe",
       "type": "textarea",
-      "label": "비고1",
+      "label": "새 textarea",
       "position": {
-        "x": 100,
-        "y": 547,
+        "x": 43.5,
+        "y": 202,
         "zIndex": 2
       },
       "style": {
-        "width": "498px",
-        "height": "98px"
+        "width": "853px",
+        "height": "189px"
+      }
+    },
+    "checkbox_1744850701136": {
+      "id": "checkbox_1744850701136",
+      "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe",
+      "type": "checkbox",
+      "label": "새 checkbox",
+      "position": {
+        "x": 45.5,
+        "y": 449,
+        "zIndex": 3
+      },
+      "style": {
+        "width": "324px",
+        "height": "121px"
+      }
+    },
+    "radio_1744850738361": {
+      "id": "radio_1744850738361",
+      "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe",
+      "type": "radio",
+      "label": "새 radio",
+      "position": {
+        "x": 394.5,
+        "y": 418,
+        "zIndex": 1
+      },
+      "style": {
+        "width": "486px",
+        "height": "130px"
+      },
+      "options": [
+        {
+          "value": "option1",
+          "label": "옵션 1"
+        },
+        {
+          "value": "option2",
+          "label": "옵션 2"
+        }
+      ]
+    },
+    "checkbox_1744850987174_j3hu7nx40": {
+      "id": "checkbox_1744850987174_j3hu7nx40",
+      "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe",
+      "type": "checkbox",
+      "label": "새 checkbox",
+      "position": {
+        "x": 49.5,
+        "y": 598,
+        "zIndex": 1
+      },
+      "style": {
+        "width": "324px",
+        "height": "121px"
+      }
+    },
+    "textarea_1744850993760_3z1nm8e8k": {
+      "id": "textarea_1744850993760_3z1nm8e8k",
+      "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe",
+      "type": "textarea",
+      "label": "새 textarea",
+      "position": {
+        "x": 38.5,
+        "y": 754,
+        "zIndex": 2
+      },
+      "style": {
+        "width": "853px",
+        "height": "189px"
+      }
+    },
+    "text_1744851095423_l10zxxn27": {
+      "id": "text_1744851095423_l10zxxn27",
+      "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe",
+      "type": "text",
+      "label": "서식제목",
+      "position": {
+        "x": 47.5,
+        "y": 952,
+        "zIndex": 1
+      },
+      "style": {
+        "width": "856px",
+        "height": "168px"
+      }
+    },
+    "textarea_1744851095423_stc1f94im": {
+      "id": "textarea_1744851095423_stc1f94im",
+      "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe",
+      "type": "textarea",
+      "label": "새 textarea",
+      "position": {
+        "x": 58.5,
+        "y": 1135,
+        "zIndex": 2
+      },
+      "style": {
+        "width": "853px",
+        "height": "189px"
+      }
+    },
+    "checkbox_1744851095423_hybdp7zgq": {
+      "id": "checkbox_1744851095423_hybdp7zgq",
+      "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe",
+      "type": "checkbox",
+      "label": "새 checkbox",
+      "position": {
+        "x": 60.5,
+        "y": 1382,
+        "zIndex": 3
+      },
+      "style": {
+        "width": "324px",
+        "height": "121px"
+      }
+    },
+    "radio_1744851095423_6z4zbref4": {
+      "id": "radio_1744851095423_6z4zbref4",
+      "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe",
+      "type": "radio",
+      "label": "새 radio",
+      "position": {
+        "x": 409.5,
+        "y": 1351,
+        "zIndex": 4
+      },
+      "style": {
+        "width": "486px",
+        "height": "130px"
+      },
+      "options": [
+        {
+          "value": "option1",
+          "label": "옵션 1"
+        },
+        {
+          "value": "option2",
+          "label": "옵션 2"
+        }
+      ]
+    },
+    "checkbox_1744851095423_rr08s9z7y": {
+      "id": "checkbox_1744851095423_rr08s9z7y",
+      "widgetId": "99a92734-5610-4b01-bad1-d566eadd98fe",
+      "type": "checkbox",
+      "label": "새 checkbox",
+      "position": {
+        "x": 64.5,
+        "y": 1531,
+        "zIndex": 5
+      },
+      "style": {
+        "width": "324px",
+        "height": "121px"
       }
     }
   },

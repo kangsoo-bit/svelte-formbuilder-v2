@@ -29,6 +29,7 @@
 	let selectionStart = $state({ x: 0, y: 0 });
 	let selectionEnd = $state({ x: 0, y: 0 });
 	let selectedControlIds = $state<string[]>([]);
+	let copiedControls = $state<FormField[]>([]);
 
 	// 폼 초기화 확인
 	$effect(() => {
@@ -486,9 +487,47 @@
 			editingControlId = controlId;
 		}
 	}
+
+	function handleKeyDown(e: KeyboardEvent) {
+		// Ctrl+C 또는 Cmd+C: 선택된 컨트롤 복사
+		if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+			e.preventDefault();
+			if (selectedControlIds.length > 0 && form?.model) {
+				copiedControls = selectedControlIds.map(id => ({
+					...form.model[id],
+					id: `${form.model[id].type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+					widgetId: form.widgetId
+				}));
+			}
+		}
+		// Ctrl+V 또는 Cmd+V: 복사된 컨트롤 붙여넣기
+		else if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+			e.preventDefault();
+			if (copiedControls.length > 0 && form?.model) {
+				const newControls = copiedControls.map(control => ({
+					...control,
+					id: `${control.type}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+					position: {
+						...control.position,
+						x: (control.position?.x || 0) + 20,
+						y: (control.position?.y || 0) + 20,
+						zIndex: maxZIndex++
+					}
+				}));
+
+				form.model = {
+					...form.model,
+					...Object.fromEntries(newControls.map(control => [control.id, control]))
+				};
+
+				// 새로 붙여넣은 컨트롤들을 선택 상태로 만듦
+				selectedControlIds = newControls.map(control => control.id);
+			}
+		}
+	}
 </script>
 
-<div class="form-builder">
+<div class="form-builder" onkeydown={handleKeyDown} tabindex="0">
 	<div class="form-header">
 		<input 
 			type="text" 
